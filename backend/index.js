@@ -25,7 +25,7 @@ async function connectToDB(){
 		host: "localhost",
 		user: "root",
 		password: "Armasazar1",
-		database: "padron_issste",
+		database: "padronISSSTE",
 		dateStrings: true
 	});
 	console.log("conectado a la base de datos");
@@ -107,6 +107,39 @@ app.post("/infantes", async (req, res)=>{
 app.delete("/infantes/:id", async (req, res)=>{
 	await deleteInfante(req, res);
 });
+
+app.post("/registrarse", async (req, res)=>{
+	let username=req.body.username;
+	let password=req.body.password;
+	const[usuarios]=await db.query("SELECT * FROM usuarios WHERE usuario = ?", [username]);
+	if(usuarios.length==0){
+		const hash=await argon2.hash(password, {type: argon2.argon2id, memoryCost: 64*1024, timeCost: 3, parallelism: 1, saltLength: 128});
+		await db.query("INSERT INTO usuarios (usuario, password_hash, rol) VALUES (?, ?, ?)", [username, hash, "admin"]);
+		res.sendStatus(201);
+	}
+	else{
+		res.sendStatus(403);
+	}
+})
+
+app.post("/login", async (req, res)=>{
+	let username=req.body.username;
+	let password=req.body.password;
+	const[usuarios]=await db.query("SELECT * FROM usuarios WHERE usuario = ?", [username]);
+	if(usuarios.length==0){
+		res.sendStatus(401);
+	}
+	else{
+		let usuario =usuarios[0];
+		if(await argon2.verify(usuario.password_hash, password)){
+			let token=jwt.sign({"Usuario": usuario.usuario}, "llavesecreta", {expiresIn: 900});
+			res.json({"token": token, "id": usuario.usuario});
+		}
+		else{
+			res.sendStatus(401);
+		}
+	}
+})
 
 
 app.listen(PORT, async ()=>{
