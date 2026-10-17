@@ -47,12 +47,12 @@ CREATE TABLE padres_infantes(   -- Tabla puente entre usuarios y padron para la 
 CREATE TABLE mediciones(
     id_medicion INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     id_infante INT NOT NULL,                  -- mismo tipo que padron.id_infante
-    fecha DATE NOT NULL,
+    fecha DATE NOT NULL,  -- Para validar que hayan pasado 45 días para tomar una nueva medición
     peso FLOAT NOT NULL,               -- kg
     talla FLOAT NOT NULL,              -- cm
     talla_blanco_familiar FLOAT NOT NULL,
     perimetro_cefalico FLOAT NOT NULL, -- cm
-    id_usuario INT UNSIGNED NOT NULL,         -- quién la capturó
+    id_usuario INT UNSIGNED DEFAULT NULL,         -- quién la capturó
     FOREIGN KEY (id_infante) REFERENCES padron(id_infante),
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

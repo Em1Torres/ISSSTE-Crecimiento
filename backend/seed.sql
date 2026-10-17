@@ -48,11 +48,11 @@ JOIN padron p ON p.matricula IN (100001, 100002)
 WHERE u.usuario = 'padre001';
 
 -- No se puede correr hasta que generamos los usuarios desde el backend con argon2
-SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'estancia_mty1');
+-- SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'estancia_mty1');
 
 INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico, id_usuario) VALUES
-((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 100 DAY, 14.2, 95.5, 172, 49.5, @estancia),
-((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 20 DAY,  15.0, 98.0, 172, 49.8, @estancia),
-((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 95 DAY,  15.8, 101.0, 168, 49.0, @estancia),
-((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 10 DAY,  16.5, 103.5, 168, 49.2, @estancia),
-((SELECT id_infante FROM padron WHERE matricula = 100003), CURDATE() - INTERVAL 60 DAY,  11.8, 86.0, 175, 48.0, @estancia);
+((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 100 DAY, 14.2, 95.5, 172, 49.5, NULL),
+((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 20 DAY,  15.0, 98.0, 172, 49.8, NULL),
+((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 95 DAY,  15.8, 101.0, 168, 49.0, NULL),
+((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 10 DAY,  16.5, 103.5, 168, 49.2, NULL),
+((SELECT id_infante FROM padron WHERE matricula = 100003), CURDATE() - INTERVAL 60 DAY,  11.8, 86.0, 175, 48.0, NULL);
