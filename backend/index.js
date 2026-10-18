@@ -98,25 +98,59 @@ async function deleteInfante(req, res){
 	res.json({success: true});
 }
 
-app.get("/infantes", requireAuth, async (req, res)=>{
-	// let username = req.params.username; 
-	await getListInfantes(req, res);
+app.get("/infantes", async (req, res)=>{
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await getListInfantes(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
-app.get("/infantes/:id", requireAuth, async (req, res)=>{
-	await getOneInfante(req, res);
+app.get("/infantes/:id", async (req, res)=>{
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await getOneInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
-app.put("/infantes/:id", requireAuth, soloRoles("admin", "estancia"), async (req, res)=>{
-	await updateInfante(req, res);
+app.put("/infantes/:id", async (req, res)=>{
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await updateInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 })
 
-app.post("/infantes", requireAuth, soloRoles("admin", "estancia"), async (req, res)=>{
-	await createInfante(req, res);
+app.post("/infantes", async (req, res)=>{
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await createInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
-app.delete("/infantes/:id", requireAuth, soloRoles("admin", "estancia"), async (req, res)=>{
-	await deleteInfante(req, res);
+app.delete("/infantes/:id", async (req, res)=>{
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await deleteInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
 app.post("/registrarse", async (req, res)=>{
