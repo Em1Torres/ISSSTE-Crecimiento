@@ -73,14 +73,14 @@ async function getOneInfante(req, res){
 }
 
 async function updateInfante(req, res){
-	let id = Number(req.params.id);
-	let datos = req.body;
-	let consulta = "UPDATE padron SET matricula = ?, nombre = ?, paterno = ?, materno = ?, genero = ?, fnac = ? WHERE id_infante = ?";
-	await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
-	// consulta = "UPDATE ebdis SET nombre = ?";
-	// await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
-	// await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
-	await getOneInfante(req, res);
+    let id = Number(req.params.id);
+    let datos = req.body;
+    let consulta = "UPDATE padron SET matricula = ?, nombre = ?, paterno = ?, materno = ?, genero = ?, fnac = ? WHERE id_infante = ?";
+    await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
+    // consulta = "UPDATE ebdis SET nombre = ?";
+    // await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
+    // await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
+    await getOneInfante(req, res);
 }
 
 // async function createInfante(req, res){
@@ -120,7 +120,7 @@ app.get("/infantes/:id", async (req, res)=>{
 	}
 });
 
-app.put("/infantes/:id", async (req, res)=>{
+app.put("/infantes/:id",soloRoles("admin", "estancia"),  async (req, res)=>{
 	try{
 		let  token=req.get("Authentication");
 		await jwt.verify(token, "llavesecreta");
@@ -131,7 +131,7 @@ app.put("/infantes/:id", async (req, res)=>{
 	}
 })
 
-app.post("/infantes", async (req, res)=>{
+app.post("/infantes", soloRoles("admin", "estancia"),  async (req, res)=>{
 	try{
 		let  token=req.get("Authentication");
 		await jwt.verify(token, "llavesecreta");
@@ -142,7 +142,7 @@ app.post("/infantes", async (req, res)=>{
 	}
 });
 
-app.delete("/infantes/:id", async (req, res)=>{
+app.delete("/infantes/:id", soloRoles("admin", "estancia"),  async (req, res)=>{
 	try{
 		let  token=req.get("Authentication");
 		await jwt.verify(token, "llavesecreta");
@@ -168,29 +168,12 @@ app.post("/registrarse", async (req, res)=>{
 })
 const SECRET = "llavesecreta"; 
 
-async function requireAuth(req, res, next){  // Esta función nos va ayudar a checar el tiempo de validez del token con cada endpoint
-	try{
-		const encabezado = req.get("Authorization") || ""; 
-		if(!encabezado.startsWith("Bearer ")){
-			return res.status(401).json({message: "Falta iniciar sesión"});
-		}
-		const payload = jwt.verify(encabezado.slice(7), SECRET); // lanza error si el token es falso o venció
-		const [usuarios] = await db.query("SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1", [payload.Usuario]);
-		if(usuarios.length == 0){
-			return res.status(401).json({message: "Usuario no válido"});
-		}
-		req.usuario = usuarios[0];
-		next(); // pasa al siguiente parámetro del get/post
-	}catch(err){
-		res.status(401).json({message: "Sesión inválida o vencida"});
-	}
-}
 function soloRoles(permitidos){
 	return (req, res, next)=>{
 		if(permitidos.includes(req.usuario.rol)){
 			return next();
 		}
-		return res.status(403).json({message: "Tu rol no puede hacer esto"});
+		return res.sendStatus(403).json({message: "Tu rol no puede hacer esto"});
 	}
 }
 function alcance(usuario){
@@ -218,7 +201,7 @@ app.post("/login", async (req, res)=>{
 	else{
 		let usuario =usuarios[0];
 		if(await argon2.verify(usuario.password_hash, password)){
-			let token=jwt.sign({"Usuario": usuario.usuario}, SECRET, {expiresIn: 900});
+			let token=jwt.sign({"Usuario": usuario.usuario}, "llavesecreta", {expiresIn: 900});
 			res.json({"token": token, "id": usuario.usuario, "rol": usuario.rol});
 		}
 		else{
@@ -226,113 +209,6 @@ app.post("/login", async (req, res)=>{
 		}
 	}
 })
-
-// // ---------- MEDICIONES ----------
-// const DIAS_ENTRE_MEDICIONES = 45; // R02: una medición nueva solo 45 días después de la anterior
-// const ordenMediciones = ["id", "fecha", "peso", "talla"];
-
-
-
-// // infanteVisible: true si ese infante está dentro del alcance del usuario
-// async function infanteVisible(usuario, idInfante){
-// 	let filas = [];
-// 	let consulta;
-// 	consultaInicial = "SELECT p.id_infante FROM padron p INNER JOIN ebdis e ON e.ur = p.ur AND e.ebdi_num = p.ebdi INNER JOIN estados s ON s.id_estado = e.id_estado WHERE p.activo = 1 AND p.id_infante = ?";
-// 	if(usuario.rol == "admin"){
-// 		filas = await db.query(consulta, [idInfante]);
-// 	}
-// 	else if(usuario.rol == "regional"){
-// 		consulta = consultaInicial + " AND s.id_region = ?"
-// 		filas = await db.query(consulta, [idInfante, usuario.id_region]);
-// 	}
-// 	else if(usuario.rol == "estancia"){
-// 		consulta = consultaInicial + " AND e.id_ebdi = ?"
-// 		filas = await db.query(consulta, [idInfante, usuario.id_ebdi]);
-// 	}
-// 	else if(usuario.rol == "padre"){
-// 		consulta = consultaInicial + " AND p.id_infante IN (SELECT id_infante FROM padres_infantes WHERE id_usuario = ?)"
-// 		filas = await db.query(consulta, [idInfante, usuario.id_usuario]);
-// 	}
-// 	else{
-// 		consulta = consultaInicial + " AND s.id_region = ?"
-// 		filas = await db.query(consulta, [idInfante, usuario.id_region]);
-// 	}
-// 	return filas.length > 0;
-// }
-
-// // GET /mediciones?id_infante=1&_sort=fecha&_order=DESC&_start=0&_end=10
-// async function getListMediciones(req, res){
-// 	if(req.query.id_infate > 0){
-// 		const idInfante = Number(req.query.id_infante);
-// 		if(!idInfante || !(await infanteVisible(req.usuario, idInfante))){
-// 			return res.status(404).json({message: "Infante no encontrado"});
-// 		}
-// 		let columna = "id";
-// 		if(ordenMediciones.includes(req.query._sort)){
-// 			columna = req.query._sort;
-// 		}
-// 		let direccion = "ASC";
-// 		if(req.query._order == "DESC"){
-// 			direccion = "DESC";
-// 		}
-// 		let inicio = Number(req.query._start) || 0;
-// 		let cuantos = (Number(req.query._end) || 10) - inicio;
-
-// 		const [conteo] = await db.query("SELECT COUNT(*) AS total FROM mediciones WHERE id_infante = ?", [idInfante]);
-// 		const [mediciones] = await db.query(
-// 			"SELECT id_medicion AS id, id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico FROM mediciones WHERE id_infante = ? ORDER BY " + columna + " " + direccion + " LIMIT ? OFFSET ?",
-// 			[idInfante, cuantos, inicio]);
-
-// 		res.set("Access-Control-Expose-Headers", "X-Total-Count");
-// 		res.set("X-Total-Count", conteo[0].total);
-// 		res.json(mediciones);
-// 	}
-// 	else{
-// 		res.status(500);
-// 	}
-// }
-
-// // POST /mediciones: guarda una medición nueva
-// async function createMedicion(req, res){
-// 	try{
-// 		// FR10 y R05: captura la estancia (o el admin); el padre solo consulta
-// 		if(req.usuario.rol != "estancia" && req.usuario.rol != "admin"){
-// 			return res.status(403).json({message: "Tu rol no puede registrar mediciones"});
-// 		}
-
-// 		const datos = req.body;
-// 		const idInfante = Number(datos.id_infante);
-// 		if(!idInfante || !(await infanteVisible(req.usuario, idInfante))){
-// 			return res.status(404).json({message: "Infante no encontrado"});
-// 		}
-
-// 		// R01: solo estas cuatro medidas (la edad se calcula), todas números mayores a 0
-// 		const medidas = [datos.peso, datos.talla, datos.talla_blanco_familiar, datos.perimetro_cefalico];
-// 		if(medidas.some(m => !(Number(m) > 0))){
-// 			return res.status(400).json({message: "Peso, talla, talla del blanco familiar y perímetro cefálico deben ser números mayores a 0"});
-// 		}
-
-// 		// R02: días desde la última medición (null si el infante no tiene ninguna). El admin se salta la regla
-// 		const [ultima] = await db.query("SELECT DATEDIFF(CURDATE(), MAX(fecha)) AS dias FROM mediciones WHERE id_infante = ?", [idInfante]);
-// 		const dias = ultima[0].dias;
-// 		if(req.usuario.rol != "admin" && dias !== null && dias < DIAS_ENTRE_MEDICIONES){
-// 			return res.status(400).json({message: "Faltan " + (DIAS_ENTRE_MEDICIONES - dias) + " días para registrar otra medición"});
-// 		}
-
-// 		const [resultado] = await db.query(
-// 			"INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico, id_usuario) VALUES (?, CURDATE(), ?, ?, ?, ?, ?)",
-// 			[idInfante, Number(datos.peso), Number(datos.talla), Number(datos.talla_blanco_familiar), Number(datos.perimetro_cefalico), req.usuario.id_usuario]);
-
-// 		res.json({id: resultado.insertId, id_infante: idInfante});
-// 	}catch(err){
-// 		console.error("Error en POST /mediciones:", err);
-// 		res.status(500).json({message: "No se pudo guardar la medición"});
-// 	}
-// }
-
-// app.get("/mediciones", requireAuth, getListMediciones);
-// app.post("/mediciones", requireAuth, createMedicion);
-
 app.listen(PORT, async ()=>{
 	await connectToDB();
 	console.log("Backend corriendo en puerto 3000");
