@@ -47,7 +47,10 @@ async function getListInfantes(req, res){
 	let cuantos= final-inicio;
 	let alc = alcance(req.usuario)
 
-	const [resultadoConteo] = await db.query("SELECT COUNT(*) AS total " + queryFrom + " WHERE p.activo = 1" + alc.sql, alc.params);
+	const [resultadoConteo] = await db.query("SELECT COUNT(*) AS total " + " FROM padron AS p" +
+		" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi"+
+		" INNER JOIN estados AS s ON s.id_estado = e.id_estado"
+		+ " WHERE p.activo = 1" + alc.sql, alc.params);
 	let total = resultadoConteo[0].total;
 
 	let consulta = "SELECT p.id_infante AS id, p.matricula, p.nombre, p.paterno, p.materno, p.genero, p.fnac, e.nombre AS ebdi, s.nombre AS estado" +
@@ -98,59 +101,35 @@ async function deleteInfante(req, res){
 	res.json({success: true});
 }
 
-app.get("/infantes", async (req, res)=>{
-	try{
-		let  token=req.get("Authentication");
-		await jwt.verify(token, "llavesecreta");
-		await getListInfantes(req, res);
-	}
-	catch{
-		res.sendStatus(401);
-	}
+app.get("/infantes", requireAuth, async (req, res)=>{
+	await getListInfantes(req, res);
+	
 });
 
-app.get("/infantes/:id", async (req, res)=>{
-	try{
-		let  token=req.get("Authentication");
-		await jwt.verify(token, "llavesecreta");
+app.get("/infantes/:id", requireAuth, async (req, res)=>{
+	
 		await getOneInfante(req, res);
-	}
-	catch{
-		res.sendStatus(401);
-	}
+	
 });
 
-app.put("/infantes/:id",soloRoles("admin", "estancia"),  async (req, res)=>{
-	try{
-		let  token=req.get("Authentication");
-		await jwt.verify(token, "llavesecreta");
+app.put("/infantes/:id", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
+	
 		await updateInfante(req, res);
-	}
-	catch{
-		res.sendStatus(401);
-	}
+	
 })
 
-app.post("/infantes", soloRoles("admin", "estancia"),  async (req, res)=>{
-	try{
-		let  token=req.get("Authentication");
-		await jwt.verify(token, "llavesecreta");
-		await createInfante(req, res);
-	}
-	catch{
-		res.sendStatus(401);
-	}
-});
+// app.post("/infantes", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
+	
+// 		;
+// 		await createInfante(req, res);
+	
+// });
 
-app.delete("/infantes/:id", soloRoles("admin", "estancia"),  async (req, res)=>{
-	try{
-		let  token=req.get("Authentication");
-		await jwt.verify(token, "llavesecreta");
+app.delete("/infantes/:id", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
+	
+		
 		await deleteInfante(req, res);
-	}
-	catch{
-		res.sendStatus(401);
-	}
+	
 });
 
 app.post("/registrarse", async (req, res)=>{
@@ -167,13 +146,36 @@ app.post("/registrarse", async (req, res)=>{
 	}
 })
 const SECRET = "llavesecreta"; 
+async function requireAuth(req, res, next){
+	try{
+		const encabezado = req.get("Authorization") || "";
+		if(!encabezado.startsWith("Bearer ")){
+			return res.status(401).json({message: "Falta iniciar sesión"});
+		}
+		const payload = jwt.verify(encabezado.slice(7), SECRET); // lanza error si el token es falso o venció
+		const [usuarios] = await db.query("SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1", [payload.Usuario]);
+		if(usuarios.length == 0){
+			return res.status(401).json({message: "Usuario no válido"});
+		}
+		req.usuario = usuarios[0];
+		next();
+	}catch(err){
+		res.status(401).json({message: "Sesión inválida o vencida"});
+	}
+}
 
 function soloRoles(permitidos){
 	return (req, res, next)=>{
-		if(permitidos.includes(req.usuario.rol)){
+		let permission=false;
+		for(let i=0;i<permitidos.length;i++){
+			if(permitidos[i] == req.usuario.rol){
+				permission=true;
+			}
+		}
+		if(permission){
 			return next();
 		}
-		return res.sendStatus(403).json({message: "Tu rol no puede hacer esto"});
+		return res.status(403).json({message: "Tu rol no puede hacer esto"});
 	}
 }
 function alcance(usuario){
