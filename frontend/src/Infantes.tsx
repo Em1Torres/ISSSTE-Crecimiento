@@ -25,26 +25,23 @@ export const editarInfantes = () =>(
             <TextInput source="materno" />
             <TextInput source="genero" />
             <TextInput source="fnac" label="Fecha de nacimiento" />
-            <TextInput source="ur" />
-            <TextInput source="ebdi" label="EBDI" />
-            <TextInput source="activo" />
         </SimpleForm>
     </Edit>
 );
 
-export const crearInfante = ()=>(
-    <Create redirect="list">
-        <SimpleForm>
-            <NumberInput source="matricula" />
-            <TextInput source="curp" />
-            <TextInput source="nombre" />
-            <TextInput source="paterno" />
-            <TextInput source="materno" />
-            <TextInput source="genero" />
-            <DateInput source="fnac" label="Fecha de nacimiento" />
-            <TextInput source="ur" />
-            <TextInput source="ebdi" label="EBDI" />
-            <TextInput source="activo" />
-        </SimpleForm>
-    </Create>
-);
+// export const crearInfante = ()=>(
+//     <Create redirect="list">
+//         <SimpleForm>
+//             <NumberInput source="matricula" />
+//             <TextInput source="curp" />
+//             <TextInput source="nombre" />
+//             <TextInput source="paterno" />
+//             <TextInput source="materno" />
+//             <TextInput source="genero" />
+//             <DateInput source="fnac" label="Fecha de nacimiento" />
+//             <TextInput source="ur" />
+//             <TextInput source="ebdi" label="EBDI" />
+//             <TextInput source="activo" />
+//         </SimpleForm>
+//     </Create>
+// );
