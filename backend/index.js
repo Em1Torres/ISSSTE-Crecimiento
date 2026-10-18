@@ -89,23 +89,58 @@ async function deleteInfante(req, res){
 }
 
 app.get("/infantes", async (req, res)=>{
-	await getListInfantes(req, res);
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await getListInfantes(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
 app.get("/infantes/:id", async (req, res)=>{
-	await getOneInfante(req, res);
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await getOneInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
 app.put("/infantes/:id", async (req, res)=>{
-	await updateInfante(req, res);
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await updateInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 })
 
 app.post("/infantes", async (req, res)=>{
-	await createInfante(req, res);
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await createInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
 app.delete("/infantes/:id", async (req, res)=>{
-	await deleteInfante(req, res);
+	try{
+		let  token=req.get("Authentication");
+		await jwt.verify(token, "llavesecreta");
+		await deleteInfante(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
 });
 
 app.post("/registrarse", async (req, res)=>{
