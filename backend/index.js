@@ -209,6 +209,108 @@ app.post("/login", async (req, res)=>{
 		}
 	}
 })
+
+// Mediciones
+// ---------- MEDICIONES ----------
+
+
+// GET /mediciones?id_infante=1&_sort=fecha&_order=DESC&_start=0&_end=10
+async function getListMediciones(req, res){
+		let columna = "id";
+		if(ordenPermitido.includes(req.query._sort)){
+			columna=req.query._sort;
+		}
+
+		let direccion = "ASC";
+		if(req.query._order == "DESC"){
+			direccion="DESC";
+		}
+
+		let inicio = Number(req.query._start);
+		let final= Number(req.query._end);
+		let cuantos= final-inicio;
+		let alc = alcance(req.usuario)
+
+		const [conteo] = await db.query("SELECT COUNT(*) AS total" +
+			" FROM mediciones AS m INNER JOIN padron AS p ON p.id_infante = m.id_infante" +
+			" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi" +
+			" INNER JOIN estados AS s ON s.id_estado = e.id_estado" +
+			" WHERE p.activo = 1" + alc.sql, alc.params);
+		let total = conteo[0].total;
+
+		const [mediciones] = await db.query(
+			"SELECT m.id_medicion AS id, m.id_infante, m.fecha, m.peso, m.talla, m.talla_blanco_familiar, m.perimetro_cefalico, " +
+			"TIMESTAMPDIFF(MONTH, p.fnac, m.fecha) AS edad_meses, p.nombre AS infante, e.nombre AS nombre_ebdi, s.nombre AS estado" +
+			" FROM mediciones AS m INNER JOIN padron AS p ON p.id_infante = m.id_infante" +
+			" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi" +
+			" INNER JOIN estados AS s ON s.id_estado = e.id_estado" +
+			" WHERE p.activo = 1" + alc.sql+
+			" ORDER BY " + columna + " " + direccion + 
+			" LIMIT ? OFFSET ?",
+			[...alc.params, cuantos, inicio]);
+
+		res.set("Access-Control-Expose-Headers", "X-Total-Count");
+		res.set("X-Total-Count", total);
+		res.json(mediciones);
+
+}
+
+// POST /mediciones: guarda una medición nueva
+// async function createMedicion(req, res){
+// 	try{
+// 		// FR10 y R05: captura la estancia (o el admin); el padre solo consulta
+// 		if(req.usuario.rol != "estancia" && req.usuario.rol != "admin"){
+// 			return res.status(403).json({message: "Tu rol no puede registrar mediciones"});
+// 		}
+
+// 		const datos = req.body;
+// 		const idInfante = Number(datos.id_infante);
+// 		if(!idInfante || !(await infanteVisible(req.usuario, idInfante))){
+// 			return res.status(404).json({message: "Infante no encontrado"});
+// 		}
+
+// 		// R01: solo estas cuatro medidas (la edad se calcula), todas números mayores a 0
+// 		const medidas = [datos.peso, datos.talla, datos.talla_blanco_familiar, datos.perimetro_cefalico];
+// 		if(medidas.some(m => !(Number(m) > 0))){
+// 			return res.status(400).json({message: "Peso, talla, talla del blanco familiar y perímetro cefálico deben ser números mayores a 0"});
+// 		}
+
+// 		// R02: días desde la última medición (null si el infante no tiene ninguna). El admin se salta la regla
+// 		const [ultima] = await db.query("SELECT DATEDIFF(CURDATE(), MAX(fecha)) AS dias FROM mediciones WHERE id_infante = ?", [idInfante]);
+// 		const dias = ultima[0].dias;
+// 		if(req.usuario.rol != "admin" && dias !== null && dias < DIAS_ENTRE_MEDICIONES){
+// 			return res.status(400).json({message: "Faltan " + (DIAS_ENTRE_MEDICIONES - dias) + " días para registrar otra medición"});
+// 		}
+
+// 		const [resultado] = await db.query(
+// 			"INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico, id_usuario) VALUES (?, CURDATE(), ?, ?, ?, ?, ?)",
+// 			[idInfante, Number(datos.peso), Number(datos.talla), Number(datos.talla_blanco_familiar), Number(datos.perimetro_cefalico), req.usuario.id_usuario]);
+
+// 		res.json({id: resultado.insertId, id_infante: idInfante});
+// 	}catch(err){
+// 		console.error("Error en POST /mediciones:", err);
+// 		res.status(500).json({message: "No se pudo guardar la medición"});
+// 	}
+// }
+
+app.get("/mediciones", async (req, res)=>{
+	try{
+		let token=req.get("Authentication");
+		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let user = verifiedToken.Usuario;
+		const [usuarios]=await db.query(
+			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
+			[user]
+		);
+		req.usuario=usuarios[0];
+		await getListMediciones(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
+});
+// app.post("/mediciones", requireAuth, createMedicion);
+
 app.listen(PORT, async ()=>{
 	await connectToDB();
 	console.log("Backend corriendo en puerto 3000");

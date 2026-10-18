@@ -1,10 +1,11 @@
 import { Admin, Resource , CustomRoutes} from "react-admin";
 import {Route} from "react-router-dom";
 import { Layout } from "./Layout";
-import {listarInfantes, editarInfantes} from "./Infantes"
-import {dataProvider} from "./dataProvider"
+import {listarInfantes, editarInfantes} from "./Infantes";
+import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
+import {listarMediciones} from "./mediciones";
 
 export const App = () => (
     <Admin layout={Layout} dataProvider={dataProvider} authProvider={authProvider}>
@@ -12,6 +13,12 @@ export const App = () => (
             name="infantes"
             list={listarInfantes}
             edit={editarInfantes}
+            // create={crearInfante}
+        />
+        <Resource
+            name="mediciones"
+            list={listarMediciones}
+            // edit={editarInfantes}
             // create={crearInfante}
         />
         <CustomRoutes>
