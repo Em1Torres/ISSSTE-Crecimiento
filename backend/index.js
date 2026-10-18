@@ -83,7 +83,7 @@ async function updateInfante(req, res){
     // consulta = "UPDATE ebdis SET nombre = ?";
     // await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
     // await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
-    await getOneInfante(req, res);
+    console.log(await getOneInfante(req, res));
 }
 
 // async function createInfante(req, res){
@@ -101,35 +101,43 @@ async function deleteInfante(req, res){
 	res.json({success: true});
 }
 
-app.get("/infantes", requireAuth, async (req, res)=>{
-	await getListInfantes(req, res);
+app.get("/infantes", async (req, res)=>{
+	try{
+		let token=req.get("Authentication");
+		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let user = verifiedToken.Usuario;
+		const [usuarios]=await db.query(
+			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
+			[user]
+		);
+		req.usuario=usuarios[0];
+		await getListInfantes(req, res);
+	}
+	catch{
+		res.sendStatus(401);
+	}
+		
+});
+
+app.get("/infantes/:id",  async (req, res)=>{
+	
+	await getOneInfante(req, res);
 	
 });
 
-app.get("/infantes/:id", requireAuth, async (req, res)=>{
-	
-		await getOneInfante(req, res);
-	
+app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
+	await updateInfante(req, res);
 });
 
-app.put("/infantes/:id", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
-	
-		await updateInfante(req, res);
-	
-})
-
-// app.post("/infantes", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
+// app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	
 // 		;
 // 		await createInfante(req, res);
 	
 // });
 
-app.delete("/infantes/:id", requireAuth, soloRoles(["admin", "estancia"]),  async (req, res)=>{
-	
-		
-		await deleteInfante(req, res);
-	
+app.delete("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{	
+	await deleteInfante(req, res);
 });
 
 app.post("/registrarse", async (req, res)=>{
@@ -145,30 +153,20 @@ app.post("/registrarse", async (req, res)=>{
 		res.sendStatus(403);
 	}
 })
-const SECRET = "llavesecreta"; 
-async function requireAuth(req, res, next){
-	try{
-		const encabezado = req.get("Authorization") || "";
-		if(!encabezado.startsWith("Bearer ")){
-			return res.status(401).json({message: "Falta iniciar sesión"});
-		}
-		const payload = jwt.verify(encabezado.slice(7), SECRET); // lanza error si el token es falso o venció
-		const [usuarios] = await db.query("SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1", [payload.Usuario]);
-		if(usuarios.length == 0){
-			return res.status(401).json({message: "Usuario no válido"});
-		}
-		req.usuario = usuarios[0];
-		next();
-	}catch(err){
-		res.status(401).json({message: "Sesión inválida o vencida"});
-	}
-}
 
 function soloRoles(permitidos){
-	return (req, res, next)=>{
+	return async (req, res, next)=>{
+		let token=req.get("Authentication");
+		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let user = verifiedToken.Usuario;
+		const [usuario]=await db.query(
+			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
+			[user]
+		);
+
 		let permission=false;
 		for(let i=0;i<permitidos.length;i++){
-			if(permitidos[i] == req.usuario.rol){
+			if(permitidos[i] == usuario[0].rol){
 				permission=true;
 			}
 		}
@@ -196,7 +194,7 @@ function alcance(usuario){
 app.post("/login", async (req, res)=>{
 	let username=req.body.username;
 	let password=req.body.password;
-	const[usuarios]=await db.query("SELECT * FROM usuarios WHERE usuario = ?", [username]);
+	const[usuarios]=await db.query("SELECT * FROM usuarios WHERE activo = 1 AND usuario = ?", [username]);
 	if(usuarios.length==0){
 		res.sendStatus(401);
 	}

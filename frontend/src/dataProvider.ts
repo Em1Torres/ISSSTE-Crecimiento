@@ -1,14 +1,11 @@
-import { fetchUtils } from "react-admin";
+import { fetchUtils, UrlField } from "react-admin";
 import jsonServerProvider from "ra-data-json-server";
 
 const fetchJsonUtil=(url:string, options:fetchUtils.Options={})=>{
     if(!options.headers){
         options.headers= new Headers({Accept: "application/json"});
     }
-    const token=sessionStorage.getItem("auth");
-    if(token){
-        (options.headers as Headers).set("Authorization", "Bearer " + token);
-    }
+    options.headers.set("Authentication", sessionStorage.getItem("auth"))
     return fetchUtils.fetchJson(url, options);
 };
 
