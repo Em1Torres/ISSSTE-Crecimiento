@@ -4,7 +4,7 @@ export const listarInfantes = () =>(
     <List>
         <Datagrid>
             <TextField source="id" />
-            <TextField source="matricula" />
+            <TextField source="matricula" />    
             <TextField source="nombre" />
             <TextField source="paterno" />
             <TextField source="materno" />
