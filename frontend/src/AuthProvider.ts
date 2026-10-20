@@ -1,6 +1,6 @@
 import { AuthProvider } from "react-admin";
 
-const authProvider:AuthProvider={
+const authProvider:AuthProvider={  // Basicamente moví que agregara el rol además de mandar el token para verificar con el backend 
     login: async({username, password})=>{
         const request=new Request("http://localhost:3000/login", {
             method:"POST",
@@ -14,6 +14,7 @@ const authProvider:AuthProvider={
             }
             const auth=await res.json();
             sessionStorage.setItem("auth", auth.token);
+            sessionStorage.setItem("rol", auth.rol);
             sessionStorage.setItem("identity", JSON.stringify({"id": auth.id}));
             return Promise.resolve();
         }catch{
@@ -22,6 +23,7 @@ const authProvider:AuthProvider={
     },
     logout: ()=>{
         sessionStorage.removeItem("auth");
+        sessionStorage.removeItem("rol");
         sessionStorage.removeItem("identity");
         return Promise.resolve();
     },
@@ -30,11 +32,13 @@ const authProvider:AuthProvider={
         const status=error.status;
         if(status==401 || status==403){
             sessionStorage.removeItem("auth");
+            sessionStorage.removeItem("rol");
             sessionStorage.removeItem("identity");
             return Promise.reject();
         }
         return Promise.resolve();
-    }
+    },
+    getPermissions: ()=>Promise.resolve(sessionStorage.getItem("rol"))
 };
 
 export default authProvider;
