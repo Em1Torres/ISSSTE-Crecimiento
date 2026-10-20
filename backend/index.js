@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express=require("express");
 const mysql=require("mysql2/promise");
 var cors=require("cors");
@@ -22,10 +23,10 @@ const valoresExtra = "0, CURDATE(), 1, CURDATE(), CURDATE(), CURDATE(), CURDATE(
 
 async function connectToDB(){
 	db = await mysql.createPool({
-		host: "localhost",
-		user: "root",
-		password: "#Clifjumper4406",
-		database: "padronISSSTE",
+		host: process.env.DB_HOST,
+		user: process.env.DB_USER,
+		password: process.env.DB_PASSWORD,
+		database: process.env.DB_NAME,
 		dateStrings: true
 	});
 	console.log("conectado a la base de datos");
