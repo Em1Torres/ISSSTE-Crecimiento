@@ -5,7 +5,9 @@ import {listarInfantes, editarInfantes} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
-import {listarMediciones} from "./mediciones";
+import {listarMediciones} from "./Mediciones";
+// @ts-ignore Graphs is a JSX module without a TypeScript declaration.
+import { GraphsPage } from "./Graphs";
 
 export const App = () => (
     <Admin layout={Layout} dataProvider={dataProvider} authProvider={authProvider}>
@@ -23,6 +25,7 @@ export const App = () => (
         />
         <CustomRoutes>
             <Route path="/registrarse" element={<Registrarse />}/>
+            <Route path="/graphs" element={<GraphsPage />} />
         </CustomRoutes>
     </Admin>
     
