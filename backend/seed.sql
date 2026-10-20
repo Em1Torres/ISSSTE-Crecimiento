@@ -56,3 +56,5 @@ INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, p
 ((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 95 DAY,  15.8, 101.0, 168, 49.0, @estancia),
 ((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 10 DAY,  16.5, 103.5, 168, 49.2, @estancia),
 ((SELECT id_infante FROM padron WHERE matricula = 100003), CURDATE() - INTERVAL 60 DAY,  11.8, 86.0, 175, 48.0, @estancia);
+
+SELECT * FROM usuarios;
