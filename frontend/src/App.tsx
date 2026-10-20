@@ -1,7 +1,7 @@
 import { Admin, Resource , CustomRoutes} from "react-admin";
 import {Route} from "react-router-dom";
 import { Layout } from "./Layout";
-import {listarInfantes, editarInfantes} from "./Infantes";
+import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
@@ -15,7 +15,7 @@ export const App = () => (
             name="infantes"
             list={listarInfantes}
             edit={editarInfantes}
-            // create={crearInfante}
+            create={crearInfante}
         />
         <Resource
             name="mediciones"

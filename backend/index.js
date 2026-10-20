@@ -13,13 +13,13 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const columnasInfantes = "p.id_infante AS id, p.matricula, p.nombre, p.paterno, p.materno, p.genero, p.fnac, e.nombre AS ebdi, s.nombre AS estado"
-const ordenPermitido = ["id", "matricula", "nombre", "paterno", "materno", "fnac", "ebdi"];
+const ordenPermitido = ["id", "matricula", "nombre", "paterno", "materno", "fnac", "ebdi", "id_ebdi"];
 //Columnas que son obligatorias que no están en nuestro formulario, son NOT NULL y no tieneen valor por defecto
 //Columnas de números les ponemos 0, columnas de fecha usamos la fecha de HOY, CURDATE()
 //Columna usuario=sistema
 //Columna estatus_servicio=1
-const columnasExtra = "id_benef_infante, freg, estatus_servicio, fmovimiento, fCambioEst_ini, fCambioEst_fin, fCambioEbdi_ini, fCambioEbdi_fin, fBaja, fCambio, discapacidad, dif_cvrp, dif_cvfn, dif_pat, dif_mat, usuario, inscripIniAbril21, inscripIniMayo21, inscripIniJunio21, inscripIniJulio21, inscIniDic2021, inscIniAbr2023, inscIniMay2023, inscIniJun2023, inscIniJul2023, inscIniAgo2023, inscIniSep2023, inscIniOct2023, inscIniNov2023, inscIniDic2023, inscIniEne2024, inscIniFeb2024, inscIniMar2024, inscIniAbr2024, inscIniMay2024, inscIniJun2024, inscIniJul2024, inscIniAgo2024, inscIniSep2024, inscIniOct2024, inscIniNov2024, InscIniDic2024, InscIniEne2025, InscIniFeb2025, InscIniMar2025, InscIniAbr2025";
-const valoresExtra = "0, CURDATE(), 1, CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), 0, 0, 0, 0, 0, 'sistema', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
+// const columnasExtra = "id_benef_infante, freg, estatus_servicio, fmovimiento, fCambioEst_ini, fCambioEst_fin, fCambioEbdi_ini, fCambioEbdi_fin, fBaja, fCambio, discapacidad, dif_cvrp, dif_cvfn, dif_pat, dif_mat, usuario, inscripIniAbril21, inscripIniMayo21, inscripIniJunio21, inscripIniJulio21, inscIniDic2021, inscIniAbr2023, inscIniMay2023, inscIniJun2023, inscIniJul2023, inscIniAgo2023, inscIniSep2023, inscIniOct2023, inscIniNov2023, inscIniDic2023, inscIniEne2024, inscIniFeb2024, inscIniMar2024, inscIniAbr2024, inscIniMay2024, inscIniJun2024, inscIniJul2024, inscIniAgo2024, inscIniSep2024, inscIniOct2024, inscIniNov2024, InscIniDic2024, InscIniEne2025, InscIniFeb2025, InscIniMar2025, InscIniAbr2025";
+// const valoresExtra = "0, CURDATE(), 1, CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), 0, 0, 0, 0, 0, 'sistema', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
 
 async function connectToDB(){
 	db = await mysql.createPool({
@@ -46,7 +46,7 @@ async function getListInfantes(req, res){
 	let inicio = Number(req.query._start);
 	let final= Number(req.query._end);
 	let cuantos= final-inicio;
-	let alc = alcance(req.usuario)
+	let alc = alcance(req.usuario);
 
 	const [resultadoConteo] = await db.query("SELECT COUNT(*) AS total " + " FROM padron AS p" +
 		" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi"+
@@ -69,9 +69,18 @@ async function getListInfantes(req, res){
 	res.json(ninos);
 }
 
+async function getListEbdis(req,res){
+	let [consulta] = await db.query(`SELECT id_ebdi AS id, nombre
+		FROM ebdis`);
+	
+	res.json(consulta);
+}
+
 async function getOneInfante(req, res){
 	let id = Number(req.params.id);
-	let consulta = "SELECT id_infante AS id, matricula, nombre, paterno, materno, genero, fnac FROM padron WHERE id_infante = ?";
+	let consulta = `SELECT p.id_infante AS id, p.matricula, p.nombre, p.paterno, p.materno, p.genero, p.fnac
+	FROM padron AS p 
+	WHERE id_infante = ?`;
 	const [nino] = await db.query(consulta, [id]);
 	res.json(nino[0]);
 }
@@ -79,22 +88,22 @@ async function getOneInfante(req, res){
 async function updateInfante(req, res){
     let id = Number(req.params.id);
     let datos = req.body;
-    let consulta = "UPDATE padron SET matricula = ?, nombre = ?, paterno = ?, materno = ?, genero = ?, fnac = ? WHERE id_infante = ?";
-    await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
+    let consulta = "CALL editarInfante(?,?,?,?,?,?,?,?)";
+    await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, datos.ebdi, id]);
     // consulta = "UPDATE ebdis SET nombre = ?";
     // await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
     // await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
     console.log(await getOneInfante(req, res));
 }
 
-// async function createInfante(req, res){
-// 	let datos = req.body;
-// 	let consulta = "INSERT INTO padron (matricula, curp, nombre, paterno, materno, genero, fnac, ur, ebdi, activo, " + columnasExtra + ") VALUES (?, 'TOCE1', ?, ?, ?, ?, ?, ?, ?, ?, " + valoresExtra + ")";
-// 	const [resultado] = await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, datos.ur, datos.ebdi, datos.activo]);
-// 	datos.id=resultado.insertId;
-// 	console.log(datos);
-// 	res.json(datos);
-// }
+async function createInfante(req, res){
+	let datos = req.body;
+	let consulta = "CALL anadirInfante(?,?,?,?,?,?,?)";
+	const [resultado] = await db.query(consulta, 
+		[datos.matricula, datos.ebdi, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac]);
+	datos.id=resultado.insertId;
+	res.json(datos);
+}
 
 async function deleteInfante(req, res){
 	let id = Number(req.params.id);
@@ -105,7 +114,7 @@ async function deleteInfante(req, res){
 app.get("/infantes", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
-		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let verifiedToken=jwt.verify(token, process.env.JWT_SECRET);
 		let user = verifiedToken.Usuario;
 		const [usuarios]=await db.query(
 			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
@@ -120,22 +129,23 @@ app.get("/infantes", async (req, res)=>{
 		
 });
 
-app.get("/infantes/:id",  async (req, res)=>{
+app.get("/ebdis", async (req, res)=>{
+	await getListEbdis(req,res);
+})
+
+app.get("/infantes/:id", async (req, res)=>{
 	
 	await getOneInfante(req, res);
-	
+
 });
 
 app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	await updateInfante(req, res);
 });
 
-// app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
-	
-// 		;
-// 		await createInfante(req, res);
-	
-// });
+app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
+	await createInfante(req, res);	
+});
 
 app.delete("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{	
 	await deleteInfante(req, res);
@@ -158,7 +168,7 @@ app.post("/registrarse", async (req, res)=>{
 function soloRoles(permitidos){
 	return async (req, res, next)=>{
 		let token=req.get("Authentication");
-		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let verifiedToken=jwt.verify(token, process.env.JWT_SECRET);
 		let user = verifiedToken.Usuario;
 		const [usuario]=await db.query(
 			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
@@ -202,7 +212,7 @@ app.post("/login", async (req, res)=>{
 	else{
 		let usuario =usuarios[0];
 		if(await argon2.verify(usuario.password_hash, password)){
-			let token=jwt.sign({"Usuario": usuario.usuario}, "llavesecreta", {expiresIn: 900});
+			let token=jwt.sign({"Usuario": usuario.usuario}, process.env.JWT_SECRET, {expiresIn: 900});
 			res.json({"token": token, "id": usuario.usuario, "rol": usuario.rol});
 		}
 		else{
@@ -297,7 +307,7 @@ async function getListMediciones(req, res){
 app.get("/mediciones", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
-		let verifiedToken=jwt.verify(token, "llavesecreta");
+		let verifiedToken=jwt.verify(token, process.env.JWT_SECRET);
 		let user = verifiedToken.Usuario;
 		const [usuarios]=await db.query(
 			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
