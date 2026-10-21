@@ -5,12 +5,19 @@ import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
-import {listarMediciones} from "./Mediciones";
-// @ts-ignore Graphs is a JSX module without a TypeScript declaration.
-import { GraphsPage } from "./Graphs";
+import { AdminInicio, crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from "./Inicio/Admin_inicio";
+import { EstanciaInicio } from "./Inicio/EBDI_inicio";
+import { PadreInicio } from "./Inicio/Padre_inicio";
+import { RegionalInicio } from "./Inicio/Regional_inicio";
+
+
 
 export const App = () => (
-    <Admin layout={Layout} dataProvider={dataProvider} authProvider={authProvider}>
+    <Admin 
+    layout={Layout} 
+    dataProvider={dataProvider} 
+    authProvider={authProvider}
+    dashboard={AdminInicio}>
         <Resource
             name="infantes"
             list={listarInfantes}
@@ -18,15 +25,29 @@ export const App = () => (
             create={crearInfante}
         />
         <Resource
-            name="mediciones"
-            list={listarMediciones}
-            // edit={editarInfantes}
-            // create={crearInfante}
+            name = "ebdi"
+            edit  = {editarEBDI}
+            create  = {crearEBDI}
         />
+      
+        <Resource
+            name = "perfiles"
+            edit = {editarPerfiles}
+            create = {crearPerfil} 
+
+        />
+
+    
+
         <CustomRoutes>
             <Route path="/registrarse" element={<Registrarse />}/>
-            <Route path="/graphs" element={<GraphsPage />} />
+            <Route path="/admin/inicio" element={<AdminInicio />} />
+            <Route path="/regional/inicio" element={<RegionalInicio />} />
+            <Route path="/estancia/inicio" element={<EstanciaInicio />} />
+            <Route path="/padre/inicio" element={<PadreInicio />} />
         </CustomRoutes>
     </Admin>
+
+    
     
 );
