@@ -45,10 +45,11 @@ INSERT INTO padres_infantes (id_usuario, id_infante)
 SELECT u.id_usuario, p.id_infante
 FROM usuarios u
 JOIN padron p ON p.matricula IN (100001, 100002)
-WHERE u.usuario = 'padre001';
+WHERE u.usuario = 'padre1';
+-- corre hasta aqui 
 
--- No se puede correr hasta que generamos los usuarios desde el backend con argon2
-SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'estancia_mty1');
+-- No se puede correr hasta que generamos los usuarios desde el backend con argon2, tercer bloque que corres 
+SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'admin1');
 
 INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico, id_usuario) VALUES
 ((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 100 DAY, 14.2, 95.5, 172, 49.5, @estancia),
@@ -57,4 +58,35 @@ INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, p
 ((SELECT id_infante FROM padron WHERE matricula = 100002), CURDATE() - INTERVAL 10 DAY,  16.5, 103.5, 168, 49.2, @estancia),
 ((SELECT id_infante FROM padron WHERE matricula = 100003), CURDATE() - INTERVAL 60 DAY,  11.8, 86.0, 175, 48.0, @estancia);
 
-SELECT * FROM usuarios;
+select * from mediciones ;
+
+-- segundo bloque que corres 
+INSERT INTO usuarios (usuario, password_hash, rol, activo)
+VALUES (
+    'padre1',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    'padre',
+    1
+);
+INSERT INTO usuarios (usuario, password_hash, rol, activo)
+VALUES (
+    'ebdi',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    'estancia',
+    1
+);
+INSERT INTO usuarios (usuario, password_hash, rol, activo)
+VALUES (
+    'regional',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    'regional',
+    1
+);
+INSERT INTO usuarios (usuario, password_hash, rol, activo)
+VALUES (
+    'admin1',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    'admin',
+    1
+);
+

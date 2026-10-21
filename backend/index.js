@@ -1,4 +1,4 @@
-require("dotenv").config();
+require("dotenv").config(); 
 const express=require("express");
 const mysql=require("mysql2/promise");
 var cors=require("cors");
@@ -213,7 +213,9 @@ app.post("/login", async (req, res)=>{
 		let usuario =usuarios[0];
 		if(await argon2.verify(usuario.password_hash, password)){
 			let token=jwt.sign({"Usuario": usuario.usuario}, process.env.JWT_SECRET, {expiresIn: 900});
-			res.json({"token": token, "id": usuario.usuario, "rol": usuario.rol});
+			res.json({"token": token, 
+						"id": usuario.usuario, 
+						"rol": usuario.rol});
 		}
 		else{
 			res.sendStatus(401);

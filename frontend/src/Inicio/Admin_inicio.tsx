@@ -9,7 +9,7 @@ export const AdminInicio = () => (
          
 
         <Typography variant="h6" gutterBottom>Directorio de EBDI's</Typography>
-        <CreateButton resource="ebdi" label="Crear EBDI" />
+        <CreateButton resource="ebdis" label="Crear EBDI" />
         <Datagrid 
         resource="ebdis" // falta endpoints 
         >
