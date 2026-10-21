@@ -9,6 +9,8 @@ import { AdminInicio, crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from 
 import { EstanciaInicio } from "./Inicio/EBDI_inicio";
 import { PadreInicio } from "./Inicio/Padre_inicio";
 import { RegionalInicio } from "./Inicio/Regional_inicio";
+// @ts-expect-error Graphs is a JSX module without TypeScript declarations.
+import {GraphsPage} from "./Graphs";
 
 
 
@@ -45,6 +47,7 @@ export const App = () => (
             <Route path="/regional/inicio" element={<RegionalInicio />} />
             <Route path="/estancia/inicio" element={<EstanciaInicio />} />
             <Route path="/padre/inicio" element={<PadreInicio />} />
+            <Route path="/graphs" element={<GraphsPage />} />
         </CustomRoutes>
     </Admin>
 
