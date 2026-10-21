@@ -1,7 +1,10 @@
 import React, {useState, ChangeEvent} from "react";
+import {useNotify, useRedirect} from "react-admin";
 
 const Registrarse: React.FC =()=>{
     const [datos, setDatos]=useState({username:"", password:""});
+    const notify = useNotify();
+    const redirect = useRedirect();
 
     const handleChange=(event:ChangeEvent<HTMLInputElement>)=>{setDatos({...datos, [event.target.name]:event.target.value})};
      
@@ -16,6 +19,8 @@ const Registrarse: React.FC =()=>{
             if(res.status<200 || res.status>=300){
                 throw new Error(res.statusText);
             }
+            notify(`Usuario creado, inicia sesión`, {type: 'success'});
+            redirect("/login");
         }catch{
             throw new Error("No se pudo registrar el usuario")
         }
