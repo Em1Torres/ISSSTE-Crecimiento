@@ -1,4 +1,5 @@
-import { Admin, Resource , CustomRoutes} from "react-admin";
+import { Admin, Resource , CustomRoutes, Login, LoginForm, LinkBase} from "react-admin";
+import {Box, Link} from '@mui/material';
 import {Route} from "react-router-dom";
 import { Layout } from "./Layout";
 import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
@@ -10,6 +11,16 @@ import { EstanciaInicio } from "./Inicio/EBDI_inicio";
 import { PadreInicio } from "./Inicio/Padre_inicio";
 import { RegionalInicio } from "./Inicio/Regional_inicio";
 
+const MyLogin = () => (
+    <Login>
+        <LoginForm />
+        <Box textAlign="center" mb={1}>
+            <Link component={LinkBase} to="/registrarse">
+                Registrarse
+            </Link>
+        </Box>
+    </Login>
+);
 
 
 export const App = () => (
@@ -17,7 +28,8 @@ export const App = () => (
     layout={Layout} 
     dataProvider={dataProvider} 
     authProvider={authProvider}
-    dashboard={AdminInicio}>
+    dashboard={AdminInicio}
+    loginPage={MyLogin}>
         <Resource
             name="infantes"
             list={listarInfantes}
