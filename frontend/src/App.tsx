@@ -1,8 +1,8 @@
 import { Admin, Resource , CustomRoutes} from "react-admin";
 import {Route} from "react-router-dom";
 import { Layout } from "./Layout";
-import {listarInfantes, editarInfantes, crearInfante} from "./Infantes"
-import {dataProvider} from "./dataProvider"
+import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
+import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
 import { AdminInicio, crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from "./Inicio/Admin_inicio";
@@ -29,7 +29,7 @@ export const App = () => (
             edit  = {editarEBDI}
             create  = {crearEBDI}
         />
-
+      
         <Resource
             name = "perfiles"
             edit = {editarPerfiles}
