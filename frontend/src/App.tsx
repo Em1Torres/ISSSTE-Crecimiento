@@ -6,12 +6,11 @@ import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
-import { AdminInicio, crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from "./Inicio/Admin_inicio";
-import { EstanciaInicio } from "./Inicio/EBDI_inicio";
-import { PadreInicio } from "./Inicio/Padre_inicio";
-import { RegionalInicio } from "./Inicio/Regional_inicio";
 // @ts-expect-error Graphs is a JSX module without TypeScript declarations.
 import {GraphsPage} from "./Graphs";
+import {i18nProvider} from "./i18nProvider";
+import { InicioRol } from "./Inicio/Inicio_Rol";
+import { listarUsuarios, editarUsuario } from "./Usuarios";
 
 const MyLogin = () => (
     <Login>
@@ -28,37 +27,26 @@ const MyLogin = () => (
 export const App = () => (
     <Admin 
     layout={Layout} 
+    i18nProvider={i18nProvider}
     dataProvider={dataProvider} 
     authProvider={authProvider}
-    dashboard={AdminInicio}
+    dashboard={InicioRol}
     loginPage={MyLogin}>
         <Resource
             name="infantes"
             list={listarInfantes}
             edit={editarInfantes}
             create={crearInfante}
+            options={{label: "Infantes"}}
         />
         <Resource
-            name = "ebdi"
-            edit  = {editarEBDI}
-            create  = {crearEBDI}
+            name="usuarios"
+            list={listarUsuarios}
+            edit={editarUsuario}
+            options={{label: "Usuarios"}}
         />
-      
-        <Resource
-            name = "perfiles"
-            edit = {editarPerfiles}
-            create = {crearPerfil} 
-
-        />
-
-    
-
         <CustomRoutes>
             <Route path="/registrarse" element={<Registrarse />}/>
-            <Route path="/admin/inicio" element={<AdminInicio />} />
-            <Route path="/regional/inicio" element={<RegionalInicio />} />
-            <Route path="/estancia/inicio" element={<EstanciaInicio />} />
-            <Route path="/padre/inicio" element={<PadreInicio />} />
             <Route path="/graphs" element={<GraphsPage />} />
         </CustomRoutes>
     </Admin>
