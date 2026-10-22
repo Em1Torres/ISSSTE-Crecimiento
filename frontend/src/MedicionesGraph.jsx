@@ -1,6 +1,23 @@
 import { useGetList } from "react-admin";
 import { useTheme } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line";
+import { Card, CardContent, Box, Typography, Divider } from "@mui/material";
+import NorthEastIcon from "@mui/icons-material/NorthEast";
+import SouthEastIcon from "@mui/icons-material/SouthEast";
+import EastIcon from "@mui/icons-material/East";
+
+const COLORES = {
+    amarillo: "#f5c400",
+    verde: "#3cc619",
+    rojo: "#ee2a2a",
+};
+
+const TRAMOS = [
+    { color: COLORES.amarillo, nombre: "Bajo peso" },
+    { color: COLORES.verde, nombre: "Peso saludable" },
+    { color: COLORES.amarillo, nombre: "Sobrepeso" },
+    { color: COLORES.rojo, nombre: "Obesidad" },
+];
 
 export const WeightGraph = () => {
     const theme = useTheme();
@@ -113,5 +130,147 @@ export const HeightGraph = () => {
                 tooltip: { container: { color: "#000" } },
             }}
         />
+    );
+};
+
+export const IMCGraph = ({
+    titulo = "Peso",
+    valor,
+    unidad = "kg",
+    anterior,
+    umbrales,
+    imc,
+    nombres,
+}) => {
+    const [b1, b2, b3] = umbrales;
+
+    // Rango visible de la barra: un poco antes de b1 y bastante después de b3
+    const min = Math.min(b1 - (b2 - b1) * 0.5, valor);
+    const max = Math.max(b3 + (b3 - b2) * 1.5, valor);
+    const pct = (v) => ((v - min) / (max - min)) * 100;
+
+    // Tramo donde cae el valor
+    let indice = 0;
+    if (valor >= b3) indice = 3;
+    else if (valor >= b2) indice = 2;
+    else if (valor >= b1) indice = 1;
+
+    const tramo = TRAMOS[indice];
+    const etiqueta = (nombres ?? TRAMOS.map((t) => t.nombre))[indice];
+
+    // Los 4 segmentos con su ancho
+    const limites = [min, b1, b2, b3, max];
+    const segmentos = TRAMOS.map((t, i) => ({
+        color: t.color,
+        ancho: pct(limites[i + 1]) - pct(limites[i]),
+    }));
+
+    // Flecha de tendencia
+    let Flecha = EastIcon;
+    if (anterior != null && valor > anterior) Flecha = NorthEastIcon;
+    if (anterior != null && valor < anterior) Flecha = SouthEastIcon;
+
+    return (
+        <Card sx={{ width: 480, maxWidth: "100%", borderRadius: 3 }}>
+            <CardContent sx={{ p: 3 }}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                    {titulo}
+                </Typography>
+                <Divider sx={{ my: 1.5 }} />
+
+                {/* Valor grande + flecha */}
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 4 }}>
+                    <Box
+                        sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: "50%",
+                            bgcolor: "action.hover",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Flecha fontSize="small" />
+                    </Box>
+                    <Typography variant="h3" component="span">
+                        {valor}
+                        <Typography variant="body1" component="span" color="text.secondary" sx={{ ml: 0.5 }}>
+                            {unidad}
+                        </Typography>
+                    </Typography>
+                </Box>
+
+                {/* Etiqueta sobre la barra, alineada con el marcador */}
+                <Box sx={{ position: "relative", mt: 3, height: 22 }}>
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            position: "absolute",
+                            left: `${pct(valor)}%`,
+                            transform: "translateX(-50%)",
+                            color: tramo.color,
+                            fontWeight: 500,
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {etiqueta}
+                    </Typography>
+                </Box>
+
+                {/* Barra segmentada + marcador */}
+                <Box sx={{ position: "relative", mt: 0.5 }}>
+                    <Box sx={{ display: "flex", height: 6, borderRadius: 3, overflow: "hidden" }}>
+                        {segmentos.map((s, i) => (
+                            <Box key={i} sx={{ width: `${s.ancho}%`, bgcolor: s.color }} />
+                        ))}
+                    </Box>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: `${pct(valor)}%`,
+                            width: 18,
+                            height: 18,
+                            transform: "translate(-50%, -50%)",
+                            borderRadius: "50%",
+                            bgcolor: tramo.color,
+                            border: "2px solid",
+                            borderColor: "text.primary",
+                        }}
+                    />
+                </Box>
+
+                {/* Números bajo los límites */}
+                <Box sx={{ position: "relative", height: 24, mt: 1 }}>
+                    {[b1, b2, b3].map((b) => (
+                        <Typography
+                            key={b}
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                                position: "absolute",
+                                left: `${pct(b)}%`,
+                                transform: "translateX(-50%)",
+                            }}
+                        >
+                            {b}
+                        </Typography>
+                    ))}
+                </Box>
+
+                {imc != null && (
+                    <>
+                        <Divider sx={{ mt: 4, mb: 1.5 }} />
+                        <Typography variant="caption" color="text.secondary">
+                            IMC:
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700}>
+                            {imc} kg/m²
+                        </Typography>
+                    </>
+                )}
+            </CardContent>
+        </Card>
     );
 };
