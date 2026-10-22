@@ -10,6 +10,7 @@ import { AdminInicio, crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from 
 import { EstanciaInicio } from "./Inicio/EBDI_inicio";
 import { PadreInicio } from "./Inicio/Padre_inicio";
 import { RegionalInicio } from "./Inicio/Regional_inicio";
+import { listarMediciones, crearMedicion } from "./Mediciones";
 // @ts-expect-error Graphs is a JSX module without TypeScript declarations.
 import {GraphsPage} from "./Graphs";
 
@@ -49,6 +50,11 @@ export const App = () => (
             edit = {editarPerfiles}
             create = {crearPerfil} 
 
+        />
+        <Resource
+            name="mediciones"
+            list={listarMediciones}
+            create={crearMedicion}
         />
 
     
