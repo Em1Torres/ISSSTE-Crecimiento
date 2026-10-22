@@ -8,7 +8,7 @@ export const listarUsuarios = () =>(
             <TextField source="rol" label="Rol" />
             <TextField source="region" label="Región" />
             <TextField source="ebdi" label="EBDI" />
-            <BooleanField source="activo" label="Activo" />
+            <TextField source="activo" label="Activo" />
         </Datagrid>
     </List>
 );
