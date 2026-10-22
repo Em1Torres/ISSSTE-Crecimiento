@@ -6,11 +6,12 @@ import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
-import { crearEBDI, crearPerfil, editarEBDI, editarPerfiles } from "./Inicio/Admin_inicio";
-import { Inicio } from "./Inicio/Inicio";
-import { listarMediciones } from "./Mediciones";
-// @ts-expect-error Graphs.jsx has no TypeScript declaration file.
-import { GraphsPage } from "./Graphs";
+import{listarMediciones, crearMedicion} from "./Mediciones";
+// @ts-expect-error Graphs is a JSX module without TypeScript declarations.
+import {GraphsPage} from "./Graphs";
+import {i18nProvider} from "./i18nProvider";
+import { InicioRol } from "./Inicio/Inicio_Rol";
+import { listarUsuarios, editarUsuario } from "./Usuarios";
 
 const MyLogin = () => (
     <Login>
