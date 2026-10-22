@@ -6,6 +6,7 @@ import {listarInfantes, editarInfantes, crearInfante} from "./Infantes";
 import {dataProvider} from "./dataProvider";
 import Registrarse from "./registrarse";
 import authProvider from "./AuthProvider";
+import{listarMediciones, crearMedicion} from "./Mediciones";
 // @ts-expect-error Graphs is a JSX module without TypeScript declarations.
 import {GraphsPage} from "./Graphs";
 import {i18nProvider} from "./i18nProvider";
@@ -44,6 +45,12 @@ export const App = () => (
             list={listarUsuarios}
             edit={editarUsuario}
             options={{label: "Usuarios"}}
+        />
+        <Resource
+            name="mediciones"
+            list={listarMediciones}
+            create={crearMedicion}
+            options={{label: "Mediciones"}}
         />
         <CustomRoutes>
             <Route path="/registrarse" element={<Registrarse />}/>
