@@ -22,7 +22,7 @@ const Registrarse: React.FC =()=>{
             notify(`Usuario creado, inicia sesión`, {type: 'success'});
             redirect("/login");
         }catch{
-            throw new Error("No se pudo registrar el usuario")
+            notify("No se pudo registrar el usuario", {type: "error"});
         }
 
     };

@@ -10,12 +10,12 @@ for(let i=0;i<ebdis_names.length;i++){
 export const listarInfantes = () =>(
     <List>
         <Datagrid>
-            <TextField source="id" />
-            <TextField source="matricula" />    
-            <TextField source="nombre" />
-            <TextField source="paterno" />
-            <TextField source="materno" />
-            <TextField source="genero" />
+            <TextField source="id" label="Id"/>
+            <TextField source="matricula" label="Matrícula"/>    
+            <TextField source="nombre" label="Nombre"/>
+            <TextField source="paterno" label="Apellido Paterno"/>
+            <TextField source="materno" label="Apellido Materno"/>
+            <TextField source="genero" label="Género"/>
             <TextField source="fnac" label="Fecha de nacimiento" />
             <TextField source="ebdi" label="EBDI" />
         </Datagrid>
@@ -25,12 +25,12 @@ export const listarInfantes = () =>(
 export const editarInfantes = () =>(
     <Edit>
         <SimpleForm warnWhenUnsavedChanges>
-            <TextInput source="id" disabled/>
-            <TextInput source="matricula" />
-            <TextInput source="nombre" />
-            <TextInput source="paterno" />
-            <TextInput source="materno" />
-            <TextInput source="genero" />
+            <TextInput source="id" label="Id" disabled/>
+            <TextInput source="matricula" label="Matrícula"/>
+            <TextInput source="nombre" label="Nombre"/>
+            <TextInput source="paterno" label="Apellido Paterno"/>
+            <TextInput source="materno" label="Apellido Materno"/>
+            <TextInput source="genero" label="Género"/>
             <TextInput source="fnac" label="Fecha de nacimiento" />
             <SelectInput source="ebdi" label="EBDI" choices={ebdis_names2} />
             {/* <TextInput source="id_ebdi" />
@@ -44,11 +44,11 @@ export const editarInfantes = () =>(
 export const crearInfante = ()=>(
     <Create redirect="list">
         <SimpleForm>
-            <NumberInput source="matricula" />
-            <TextInput source="nombre" />
-            <TextInput source="paterno" />
-            <TextInput source="materno" />
-            <TextInput source="genero" />
+            <NumberInput source="matricula" label="Matrícula"/>
+            <TextInput source="nombre" label="Nombre"/>
+            <TextInput source="paterno" label="Apellido Paterno"/>
+            <TextInput source="materno" label="Apellido Materno"/>
+            <TextInput source="genero" label="Género"/>
             <DateInput source="fnac" label="Fecha de nacimiento" />
             <SelectInput source="ebdi" label="EBDI" choices={ebdis_names2} />
             {/* <TextInput source="id_ebdi" />

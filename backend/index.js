@@ -21,6 +21,8 @@ const ordenPermitido = ["id", "matricula", "nombre", "paterno", "materno", "fnac
 // const columnasExtra = "id_benef_infante, freg, estatus_servicio, fmovimiento, fCambioEst_ini, fCambioEst_fin, fCambioEbdi_ini, fCambioEbdi_fin, fBaja, fCambio, discapacidad, dif_cvrp, dif_cvfn, dif_pat, dif_mat, usuario, inscripIniAbril21, inscripIniMayo21, inscripIniJunio21, inscripIniJulio21, inscIniDic2021, inscIniAbr2023, inscIniMay2023, inscIniJun2023, inscIniJul2023, inscIniAgo2023, inscIniSep2023, inscIniOct2023, inscIniNov2023, inscIniDic2023, inscIniEne2024, inscIniFeb2024, inscIniMar2024, inscIniAbr2024, inscIniMay2024, inscIniJun2024, inscIniJul2024, inscIniAgo2024, inscIniSep2024, inscIniOct2024, inscIniNov2024, InscIniDic2024, InscIniEne2025, InscIniFeb2025, InscIniMar2025, InscIniAbr2025";
 // const valoresExtra = "0, CURDATE(), 1, CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), 0, 0, 0, 0, 0, 'sistema', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
 
+const ordenUsuario =["id", "usuario", "rol", "activo"];
+
 async function connectToDB(){
 	db = await mysql.createPool({
 		host: process.env.DB_HOST,
@@ -71,6 +73,17 @@ async function getListInfantes(req, res){
 	res.json(ninos);
 }
 
+async function getListUsuarios(req, res) {
+	let consulta="SELECT u.id_usuario AS id, u.usuario, u.rol, u.activo, r.nombre AS region, e.nombre AS ebdi"
+	+ " FROM usuarios AS u" +
+	" LEFT JOIN regiones AS r ON r.id_region = u.id_region" +
+	" LEFT JOIN ebdis AS e ON e.id_ebdi = u.id_ebdi";
+	const [usuarios]=await db.query(consulta);
+	res.set("Access-Control-Expose-Headers", "X-Total-Count");
+	res.set("X-Total-Count", usuarios.length);
+	res.json(usuarios);
+}
+
 async function getListEbdis(req,res){
 	let [consulta] = await db.query(`SELECT id_ebdi AS id, nombre
 		FROM ebdis`);
@@ -87,6 +100,13 @@ async function getOneInfante(req, res){
 	res.json(nino[0]);
 }
 
+async function getOneUsuario(req, res){
+	let id= Number(req.params.id);
+	let consulta="SELECT id_usuario AS id, usuario, rol, id_region, id_ebdi, activo FROM usuarios WHERE id_usuario = ?";
+	const [usuario]=await db.query(consulta, [id]);
+	res.json(usuario[0]);
+}
+
 async function updateInfante(req, res){
     let id = Number(req.params.id);
     let datos = req.body;
@@ -96,6 +116,14 @@ async function updateInfante(req, res){
     // await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
     // await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
     console.log(await getOneInfante(req, res));
+}
+
+async function updateUsuario(req, res) {
+	let id=Number(req.params.id);
+	let datos=req.body;
+	let consulta="UPDATE usuarios SET usuario = ?, rol=?, id_region=?, id_ebdi=? WHERE id_usuario=?";
+	await db.query(consulta, [datos.usuario, datos.rol, datos.id_region, datos.id_ebdi, id]);
+	await getOneUsuario(req, res);
 }
 
 async function createInfante(req, res){
@@ -111,6 +139,15 @@ async function deleteInfante(req, res){
 	let id = Number(req.params.id);
 	await db.query("DELETE FROM padron WHERE id_infante = ?", [id]);
 	res.json({success: true});
+}
+
+async function deleteUsuario(req, res){
+	let id=Number(req.params.id);
+	const[usuario]=await db.query("SELECT id_usuario AS id, usuario, rol FROM usuarios WHERE id_usuario=?", [id]);
+	await db.query("DELETE FROM padres_infantes WHERE id_usuario = ?", [id]);
+	await db.query("DELETE FROM usuarios WHERE id_usuario=?", [id]);
+	res.json(usuario[0]);
+	
 }
 
 app.get("/infantes", async (req, res)=>{
@@ -135,6 +172,10 @@ app.get("/ebdis", async (req, res)=>{
 	await getListEbdis(req,res);
 })
 
+app.get("/usuarios", soloRoles(["admin"]), async(req, res)=>{
+	await getListUsuarios(req, res);
+});
+
 app.get("/infantes/:id", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -145,6 +186,10 @@ app.get("/infantes/:id", async (req, res)=>{
 	catch{
 		res.sendStatus(401);
 	}
+});
+
+app.get("/usuarios/:id", soloRoles(["admin"]), async (req, res)=>{
+	await getOneUsuario(req, res);
 });
 
 app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
@@ -164,6 +209,10 @@ app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	}
 		
 });
+
+app.put("/usuarios/:id", soloRoles(["admin"]), async(req, res)=>{
+	await updateUsuario(req, res);
+})
 
 app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	try{
@@ -193,6 +242,10 @@ app.delete("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)
 	catch{
 		res.sendStatus(401);
 	}
+});
+
+app.delete("/usuarios/:id", soloRoles(["admin"]), async (req, res)=>{
+	await deleteUsuario(req, res);
 });
 
 app.post("/registrarse", async (req, res)=>{
