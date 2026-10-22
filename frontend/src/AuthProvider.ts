@@ -1,5 +1,22 @@
 import { AuthProvider } from "react-admin";
-
+type CanAccessParams = {
+    action: string;
+    resource: string; 
+};
+const accessControlStrategies: Record<string, (params: CanAccessParams)=>boolean>={
+    admin: ()=>{
+        return true;
+    },
+    estancia: ({resource})=>{
+        return resource !== "usuarios";
+    },
+    regional: ({resource, action})=>{
+        return resource !== "usuarios" && (action=="list" || action =="show");
+    },
+    padre: ({resource, action})=>{
+        return resource !== "usuarios" && (action=="list" || action =="show");
+    },
+};
 const authProvider:AuthProvider={  // Basicamente moví que agregara el rol además de mandar el token para verificar con el backend 
     login: async({username, password})=>{
         const request=new Request("http://localhost:3000/login", {
@@ -38,7 +55,11 @@ const authProvider:AuthProvider={  // Basicamente moví que agregara el rol adem
         }
         return Promise.resolve();
     },
-    getPermissions: ()=>Promise.resolve(sessionStorage.getItem("rol"))
+    getPermissions: ()=>Promise.resolve(sessionStorage.getItem("rol")),
+    async canAccess({resource, action}){
+        const rol=sessionStorage.getItem("rol") || "";
+        return accessControlStrategies[rol]({resource, action});
+    }
 };
 
 export default authProvider;

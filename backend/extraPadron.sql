@@ -57,6 +57,37 @@ CREATE TABLE mediciones(
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP PROCEDURE IF EXISTS anadirMedicion;
+DELIMITER $$
+CREATE PROCEDURE anadirMedicion(
+    IN matricula2 INT,
+    IN peso2 FLOAT,
+    IN talla2 FLOAT,
+    IN talla_blanco_familiar2 FLOAT,
+    IN perimetro_cefalico2 FLOAT,
+    IN id_ebdi2 INT,
+    IN id_usuario2 INT
+)
+BEGIN
+    SET @id_infante2 = NULL;
+
+    SELECT p.id_infante INTO @id_infante2
+    FROM padron AS p
+    INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi
+    WHERE p.matricula = matricula2
+    AND p.activo = 1 AND e.id_ebdi = id_ebdi2;
+
+    INSERT INTO mediciones (
+        id_infante, fecha, peso, talla, talla_blanco_familiar,
+        perimetro_cefalico, id_usuario
+    )
+    VALUES (
+        @id_infante2, CURDATE(), peso2, talla2, talla_blanco_familiar2,
+        perimetro_cefalico2, id_usuario2
+    );
+END$$
+DELIMITER ;
+
 DROP PROCEDURE IF EXISTS anadirInfante;
     DELIMITER $$
     CREATE PROCEDURE anadirInfante(IN matricula2 INT(10),
