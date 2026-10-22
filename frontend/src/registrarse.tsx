@@ -9,7 +9,7 @@ const Registrarse: React.FC =()=>{
     const handleChange=(event:ChangeEvent<HTMLInputElement>)=>{setDatos({...datos, [event.target.name]:event.target.value})};
      
     const handleSendData=async()=>{
-        const request= new Request("http://localhost:3000/registrarse", {
+        const request= new Request("https://localhost:3000/registrarse", {
             method: "POST",
             body: JSON.stringify(datos),
             headers: new Headers({"Content-Type": "application/json"})

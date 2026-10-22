@@ -1,4 +1,6 @@
 seedUsers.js
+backend.key
+backend.crt
 node_modules/
 .env
 

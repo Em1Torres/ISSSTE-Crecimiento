@@ -74,7 +74,7 @@ BEGIN
     SELECT p.id_infante INTO @id_infante2
     FROM padron AS p
     INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi
-    WHERE p.matricula = matricula2
+    WHERE p.matricula = matricula2 
     AND p.activo = 1 AND e.id_ebdi = id_ebdi2;
 
     INSERT INTO mediciones (

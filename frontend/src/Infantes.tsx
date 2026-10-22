@@ -1,6 +1,6 @@
 import {Datagrid, List, TextField, Edit, SimpleForm, TextInput, Create, NumberInput, DateInput, ReferenceInput, SelectInput} from "react-admin";
 
-let res = await fetch("http://localhost:3000/ebdis");
+let res = await fetch("https://localhost:3000/ebdis");
 let ebdis_names = await res.json();
 let ebdis_names2 =[];
 for(let i=0;i<ebdis_names.length;i++){

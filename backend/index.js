@@ -6,6 +6,8 @@ const bodyParser=require("body-parser")
 const argon2=require("argon2");
 const app=express();
 const jwt=require("jsonwebtoken");
+const fs=require("fs");
+const https=require("https");	
 
 const PORT=3000;
 let db;
@@ -522,7 +524,13 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 	}
 });
 
-app.listen(PORT, async ()=>{
+const options={
+	key: fs.readFileSync("backend.key"),
+	cert: fs.readFileSync("backend.crt")
+};
+
+https.createServer(options,app).listen(PORT, async ()=>{
+	await process.loadEnvFile(".env");
 	await connectToDB();
 	console.log("Backend corriendo en puerto 3000");
 });
