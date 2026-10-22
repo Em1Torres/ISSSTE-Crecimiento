@@ -5,16 +5,37 @@ import {
   Menu,
 } from "react-admin";
 import BarChartIcon from "@mui/icons-material/BarChart";
+import HomeIcon from "@mui/icons-material/Home";
+import ChildCareIcon from "@mui/icons-material/ChildCare";
+import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
+
 
 const MyMenu = () => (
-  <Menu>
-    <Menu.ResourceItems />
-    <Menu.Item
-      to="/graphs"
-      primaryText="Graphs"
-      leftIcon={<BarChartIcon />}
-    />
-  </Menu>
+    <Menu>
+        <Menu.Item
+            to="/"
+            primaryText="Inicio"
+            leftIcon={<HomeIcon />}
+        />
+
+        <Menu.Item
+            to="/infantes"
+            primaryText="Infantes"
+            leftIcon={<ChildCareIcon />}
+        />
+
+        <Menu.Item
+            to="/mediciones"
+            primaryText="Mediciones"
+            leftIcon={<MonitorHeartIcon />}
+        />
+
+        <Menu.Item
+            to="/graphs"
+            primaryText="Graph"
+            leftIcon={<BarChartIcon />}
+        />
+    </Menu>
 );
 
 export const Layout = ({ children }: { children: ReactNode }) => (
