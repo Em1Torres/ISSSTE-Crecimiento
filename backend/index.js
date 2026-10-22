@@ -250,7 +250,7 @@ async function getListMediciones(req, res){
 		let total = conteo[0].total;
 
 		const [mediciones] = await db.query(
-			"SELECT m.id_medicion AS id, m.id_infante, m.fecha, m.peso, m.talla, m.talla_blanco_familiar, m.perimetro_cefalico, " +
+			"SELECT m.id_medicion AS id, m.id_infante, m.fecha, m.peso, m.talla, m.imc, m.talla_blanco_familiar, m.perimetro_cefalico, " +
 			"TIMESTAMPDIFF(MONTH, p.fnac, m.fecha) AS edad_meses, p.nombre AS infante, e.nombre AS nombre_ebdi, s.nombre AS estado" +
 			" FROM mediciones AS m INNER JOIN padron AS p ON p.id_infante = m.id_infante" +
 			" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi" +
@@ -321,6 +321,74 @@ app.get("/mediciones", async (req, res)=>{
 	}
 });
 // app.post("/mediciones", requireAuth, createMedicion);
+
+// ---------- ESTADO NUTRICIONAL (CDC IMC-para-edad, 24 a 72 meses) ----------
+//Esto definitivamente lo hizo Claude, lo entiendo pero es idea de Claude, no mía.
+app.get("/infantes/:id/estado", async (req, res)=>{
+	try{
+		let token=req.get("Authentication");
+		let verifiedToken=jwt.verify(token, process.env.JWT_SECRET);
+		let user = verifiedToken.Usuario;
+		const [usuarios]=await db.query(
+			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
+			[user]
+		);
+		req.usuario=usuarios[0];
+	}
+	catch{
+		return res.sendStatus(401);
+	}
+	
+	try{
+		const id = Number(req.params.id);
+		const alc = alcance(req.usuario);
+
+		const [filas] = await db.query(
+			"SELECT p.id_infante, p.genero, m.peso, m.talla, m.fecha, m.imc," +
+			" TIMESTAMPDIFF(MONTH, p.fnac, m.fecha) AS edad_meses" +
+			" FROM padron AS p" +
+			" INNER JOIN ebdis AS e ON e.ur = p.ur AND e.ebdi_num = p.ebdi" +
+			" INNER JOIN estados AS s ON s.id_estado = e.id_estado" +
+			" INNER JOIN mediciones AS m ON m.id_infante = p.id_infante" +
+			" WHERE p.activo = 1 AND p.id_infante = ?" + alc.sql +
+			" ORDER BY m.fecha DESC, m.id_medicion DESC LIMIT 2",
+			[id, ...alc.params]
+		);
+		if(filas.length == 0){
+			return res.status(404).json({message: "Sin mediciones para este infante"});
+		}
+
+		const actual = filas[0];
+		const anterior = filas[1];
+
+		const [refs] = await db.query(
+			"SELECT p5, p85, p95 FROM cdc_imc_percentiles WHERE sexo = ? AND edad_meses = ?",
+			[actual.genero, actual.edad_meses]
+		);
+		if(refs.length == 0){
+			return res.status(422).json({message: "La referencia CDC cubre de 24 a 72 meses de edad"});
+		}
+
+		const alturaM = actual.talla / 100;
+		const umbrales = [refs[0].p5, refs[0].p85, refs[0].p95]
+			.map(v => Math.round(Number(v) * alturaM * alturaM * 100) / 100);
+
+		res.json({
+			id: id,
+			valor: actual.peso,
+			unidad: "kg",
+			anterior: anterior ? anterior.peso : null,
+			umbrales: umbrales,
+			imc: actual.imc,
+			edad_meses: actual.edad_meses,
+			nombres: ["Bajo peso", "Peso saludable", "Sobrepeso", "Obesidad"],
+		});
+	}
+	catch(err){
+		console.error("Error en GET /infantes/:id/estado:", err);
+		res.status(500).json({message: "No se pudo calcular el estado"});
+	}
+});
 
 app.listen(PORT, async ()=>{
 	await connectToDB();
