@@ -1,6 +1,6 @@
 // chat me ayudo a debug, la tabla y el create 
 import { Card, CardContent, CardHeader, Button } from "@mui/material";
-import {BooleanField,Datagrid,EditButton,ListBase,TextField,} from "react-admin";
+import {Datagrid,EditButton,ListBase,TextField,} from "react-admin";
 import { Link } from "react-router-dom"; // chat 
 
 export const AdminInicio = () => (

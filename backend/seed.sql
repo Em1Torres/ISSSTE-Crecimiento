@@ -60,32 +60,32 @@ INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, p
 
 select * from mediciones ;
 
--- segundo bloque que corres 
+-- segundo bloque que corres, usuarios de prueba 
 INSERT INTO usuarios (usuario, password_hash, rol, activo)
 VALUES (
     'padre1',
-    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw', -- 1 PW
     'padre',
     1
 );
 INSERT INTO usuarios (usuario, password_hash, rol, activo)
 VALUES (
     'ebdi',
-    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw', -- 1 PW 
     'estancia',
     1
 );
 INSERT INTO usuarios (usuario, password_hash, rol, activo)
 VALUES (
     'regional',
-    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw', -- 1 PW
     'regional',
     1
 );
 INSERT INTO usuarios (usuario, password_hash, rol, activo)
 VALUES (
     'admin1',
-    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw',
+    '$argon2id$v=19$m=65536,t=3,p=1$vKPCrH2GfEIOOamUVEpw8g$TntaUz3NzyhXVgGie5Qvs6XK1JHo2gPvIwvXeKtkQlw', -- 1 PW
     'admin',
     1
 );

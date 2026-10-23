@@ -16,15 +16,9 @@ app.use(bodyParser.json());
 
 const columnasInfantes = "p.id_infante AS id, p.matricula, p.nombre, p.paterno, p.materno, p.genero, p.fnac, e.nombre AS ebdi, s.nombre AS estado"
 const ordenPermitido = ["id", "matricula", "nombre", "paterno", "materno", "fnac", "ebdi", "id_ebdi"];
-//Columnas que son obligatorias que no están en nuestro formulario, son NOT NULL y no tieneen valor por defecto
-//Columnas de números les ponemos 0, columnas de fecha usamos la fecha de HOY, CURDATE()
-//Columna usuario=sistema
-//Columna estatus_servicio=1
-// const columnasExtra = "id_benef_infante, freg, estatus_servicio, fmovimiento, fCambioEst_ini, fCambioEst_fin, fCambioEbdi_ini, fCambioEbdi_fin, fBaja, fCambio, discapacidad, dif_cvrp, dif_cvfn, dif_pat, dif_mat, usuario, inscripIniAbril21, inscripIniMayo21, inscripIniJunio21, inscripIniJulio21, inscIniDic2021, inscIniAbr2023, inscIniMay2023, inscIniJun2023, inscIniJul2023, inscIniAgo2023, inscIniSep2023, inscIniOct2023, inscIniNov2023, inscIniDic2023, inscIniEne2024, inscIniFeb2024, inscIniMar2024, inscIniAbr2024, inscIniMay2024, inscIniJun2024, inscIniJul2024, inscIniAgo2024, inscIniSep2024, inscIniOct2024, inscIniNov2024, InscIniDic2024, InscIniEne2025, InscIniFeb2025, InscIniMar2025, InscIniAbr2025";
-// const valoresExtra = "0, CURDATE(), 1, CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), CURDATE(), 0, 0, 0, 0, 0, 'sistema', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0";
-
 const ordenUsuario =["id", "usuario", "rol", "activo"];
 
+// conexion base de datos con .env
 async function connectToDB(){
 	db = await mysql.createPool({
 		host: process.env.DB_HOST,
@@ -36,6 +30,7 @@ async function connectToDB(){
 	console.log("conectado a la base de datos");
 }
 
+// lista de los infantes
 async function getListInfantes(req, res){
 	let columna = "id";
 	if(ordenPermitido.includes(req.query._sort)){
@@ -75,6 +70,7 @@ async function getListInfantes(req, res){
 	res.json(ninos);
 }
 
+// lista de usuarios
 async function getListUsuarios(req, res) {
 	let consulta="SELECT u.id_usuario AS id, u.usuario, u.rol, u.activo, r.nombre AS region, e.nombre AS ebdi"
 	+ " FROM usuarios AS u" +
@@ -86,6 +82,7 @@ async function getListUsuarios(req, res) {
 	res.json(usuarios);
 }
 
+// lista de EBDI's
 async function getListEbdis(req,res){
 	let [consulta] = await db.query(`SELECT id_ebdi AS id, nombre
 		FROM ebdis`);
@@ -93,6 +90,7 @@ async function getListEbdis(req,res){
 	res.json(consulta);
 }
 
+// buscar a un solo infante
 async function getOneInfante(req, res){
 	let id = Number(req.params.id);
 	let consulta = `SELECT p.id_infante AS id, p.matricula, p.nombre, p.paterno, p.materno, p.genero, p.fnac
@@ -102,24 +100,23 @@ async function getOneInfante(req, res){
 	res.json(nino[0]);
 }
 
+// un solo usuario
 async function getOneUsuario(req, res){
 	let id= Number(req.params.id);
 	let consulta="SELECT id_usuario AS id, usuario, rol, id_region, id_ebdi, activo FROM usuarios WHERE id_usuario = ?";
 	const [usuario]=await db.query(consulta, [id]);
 	res.json(usuario[0]);
 }
-
+// editar a un infante 
 async function updateInfante(req, res){
     let id = Number(req.params.id);
     let datos = req.body;
     let consulta = "CALL editarInfante(?,?,?,?,?,?,?,?)";
     await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, datos.ebdi, id]);
-    // consulta = "UPDATE ebdis SET nombre = ?";
-    // await db.query(consulta, [datos.matricula, datos.nombre, datos.paterno, datos.materno, datos.genero, datos.fnac, id]);
-    // await db.query(consulta, [datos.ur, datos.ebdi, datos.activo, ]);
+
     console.log(await getOneInfante(req, res));
 }
-
+// editar a un usuario
 async function updateUsuario(req, res) {
 	let id=Number(req.params.id);
 	let datos=req.body;
@@ -128,6 +125,7 @@ async function updateUsuario(req, res) {
 	await getOneUsuario(req, res);
 }
 
+// crear a un infante
 async function createInfante(req, res){
 	let datos = req.body;
 	let consulta = "CALL anadirInfante(?,?,?,?,?,?,?)";
@@ -136,13 +134,13 @@ async function createInfante(req, res){
 	datos.id=resultado.insertId;
 	res.json(datos);
 }
-
+// borrar a un infante
 async function deleteInfante(req, res){
 	let id = Number(req.params.id);
 	await db.query("DELETE FROM padron WHERE id_infante = ?", [id]);
 	res.json({success: true});
 }
-
+// borrar a un usuario
 async function deleteUsuario(req, res){
 	let id=Number(req.params.id);
 	const[usuario]=await db.query("SELECT id_usuario AS id, usuario, rol FROM usuarios WHERE id_usuario=?", [id]);
@@ -151,7 +149,7 @@ async function deleteUsuario(req, res){
 	res.json(usuario[0]);
 	
 }
-
+// endpoint get infantes lista
 app.get("/infantes", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -169,15 +167,16 @@ app.get("/infantes", async (req, res)=>{
 	}
 		
 });
-
+// endpoint EDBI's
 app.get("/ebdis", async (req, res)=>{	
 	await getListEbdis(req,res);
 })
-
+// Endpoint get usuarios
 app.get("/usuarios", soloRoles(["admin"]), async(req, res)=>{
 	await getListUsuarios(req, res);
 });
 
+// endpoint get un infante
 app.get("/infantes/:id", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -189,11 +188,11 @@ app.get("/infantes/:id", async (req, res)=>{
 		res.sendStatus(401);
 	}
 });
-
+// endpoint get un usuario
 app.get("/usuarios/:id", soloRoles(["admin"]), async (req, res)=>{
 	await getOneUsuario(req, res);
 });
-
+// endpoint actualizar a un infante
 app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -211,11 +210,11 @@ app.put("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	}
 		
 });
-
+//endpoint actualizar a un usuario
 app.put("/usuarios/:id", soloRoles(["admin"]), async(req, res)=>{
 	await updateUsuario(req, res);
 })
-
+// endpoint agregar a un infante
 app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -233,7 +232,7 @@ app.post("/infantes",  soloRoles(["admin", "estancia"]),  async (req, res)=>{
 	}
 	
 });
-
+// endpoint quitar/eliminar a un infante
 app.delete("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)=>{	
 	try{
 		let token=req.get("Authentication");
@@ -245,11 +244,11 @@ app.delete("/infantes/:id",  soloRoles(["admin", "estancia"]),  async (req, res)
 		res.sendStatus(401);
 	}
 });
-
+// endpoint eliminar a un usuario
 app.delete("/usuarios/:id", soloRoles(["admin"]), async (req, res)=>{
 	await deleteUsuario(req, res);
 });
-
+// endpoint de registrarse 
 app.post("/registrarse", async (req, res)=>{
 	let username=req.body.username;
 	let password=req.body.password;
@@ -263,7 +262,7 @@ app.post("/registrarse", async (req, res)=>{
 		res.sendStatus(403);
 	}
 })
-
+// Middleware que valida el token JWT y verifica los permisos del usuario según su rol.
 function soloRoles(permitidos){
 	return async (req, res, next)=>{
 		try{
@@ -291,6 +290,8 @@ function soloRoles(permitidos){
 		}
 	}
 }
+
+// funcion para definir el alcance de acceso a los registros según el rol del usuario. 
 function alcance(usuario){
 	if(usuario.rol == "admin"){
 		return {sql: "", params: []}; 
@@ -306,6 +307,7 @@ function alcance(usuario){
 	}
 	return {sql: " AND 1 = 0", params: []};
 }
+// endpoint de login 
 app.post("/login", async (req, res)=>{
 	let username=req.body.username;
 	let password=req.body.password;
@@ -328,7 +330,6 @@ app.post("/login", async (req, res)=>{
 })
 
 // Mediciones
-
 async function getListMediciones(req, res){
 		let columna = "id";
 		if(ordenPermitido.includes(req.query._sort)){
@@ -370,7 +371,7 @@ async function getListMediciones(req, res){
 		res.json(mediciones);
 
 }
-
+// funcion para crear una medicion
 async function createMedicion(req, res){
 	let datos = req.body;
 	let datosUsuario = req.usuario;
@@ -466,7 +467,7 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 		const [usuarios]=await db.query(
 			"SELECT id_usuario, usuario, rol, id_region, id_ebdi FROM usuarios WHERE usuario = ? AND activo = 1",
 			[user]
-		);
+		); 
 		req.usuario=usuarios[0];
 	}
 	catch{
