@@ -1,4 +1,4 @@
-import { TranslationMessages } from 'ra-core';
+import { TranslationMessages } from 'ra-core'; 
 
 const spanishMessages: TranslationMessages = {
     ra: {

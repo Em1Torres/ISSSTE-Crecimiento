@@ -1,6 +1,8 @@
 import React, {useState, ChangeEvent} from "react";
 import {useNotify, useRedirect} from "react-admin";
 
+// Esta funcion permite registrar nuevos usuarios, enviando sus datos al backend
+// y mostrando una notificación de éxito o error según el resultado del registro.
 const Registrarse: React.FC =()=>{
     const [datos, setDatos]=useState({username:"", password:""});
     const notify = useNotify();
@@ -29,7 +31,7 @@ const Registrarse: React.FC =()=>{
     
     
     return(
-    
+    // Pagina de registrarse 
         <div>
             <h2> Registro de usuario</h2>
             <form>

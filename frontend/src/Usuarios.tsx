@@ -1,5 +1,7 @@
 import {Datagrid, List, TextField, BooleanField, Edit, SimpleForm, TextInput, SelectInput, NumberInput} from "react-admin";
 
+
+// Tabla de lista de usuarios 
 export const listarUsuarios = () =>(
     <List>
         <Datagrid>
@@ -13,6 +15,7 @@ export const listarUsuarios = () =>(
     </List>
 );
 
+// Formulario para editar a un usuario
 export const editarUsuario = () =>(
     <Edit>
         <SimpleForm warnWhenUnsavedChanges>
