@@ -9,7 +9,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import ChildCareIcon from "@mui/icons-material/ChildCare";
 import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
 
-
+// el navegador de los tabuladores, incluye inicio, infantes, mediciones y graficas 
 const MyMenu = () => (
     <Menu>
         <Menu.Item
@@ -32,7 +32,7 @@ const MyMenu = () => (
 
         <Menu.Item
             to="/graphs"
-            primaryText="Graph"
+            primaryText="Graficas"
             leftIcon={<BarChartIcon />}
         />
     </Menu>

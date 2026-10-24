@@ -1,12 +1,13 @@
-import {Datagrid, List, TextField, Edit, SimpleForm, TextInput, Create, NumberInput, DateInput, ReferenceInput, SelectInput} from "react-admin";
+import {Datagrid, List, TextField, Edit, SimpleForm, TextInput, Create, NumberInput, DateInput, SelectInput} from "react-admin";
 
+// // Obtiene los nombres de las EBDI desde la API para utilizarlos en listar,editar y crear 
 let res = await fetch("https://localhost:3000/ebdis");
 let ebdis_names = await res.json();
 let ebdis_names2 =[];
 for(let i=0;i<ebdis_names.length;i++){
     ebdis_names2.push(ebdis_names[i].nombre);
-}
-
+} 
+//Lista de los infnates con sus datos 
 export const listarInfantes = () =>(
     <List>
         <Datagrid>
@@ -21,7 +22,7 @@ export const listarInfantes = () =>(
         </Datagrid>
     </List>
 );
-
+// Formulario para editar a un infante
 export const editarInfantes = () =>(
     <Edit>
         <SimpleForm warnWhenUnsavedChanges>
@@ -33,14 +34,12 @@ export const editarInfantes = () =>(
             <TextInput source="genero" label="Género"/>
             <TextInput source="fnac" label="Fecha de nacimiento" />
             <SelectInput source="ebdi" label="EBDI" choices={ebdis_names2} />
-            {/* <TextInput source="id_ebdi" />
-            <ReferenceInput source="id_ebdi" reference="ebdis">
-	            <SelectInput optionText="nombre" label="EBDI" />
-            </ReferenceInput> */}
+         
         </SimpleForm>
     </Edit>
 );
 
+//Formulario para crear a un infante
 export const crearInfante = ()=>(
     <Create redirect="list">
         <SimpleForm>
@@ -51,10 +50,7 @@ export const crearInfante = ()=>(
             <TextInput source="genero" label="Género"/>
             <DateInput source="fnac" label="Fecha de nacimiento" />
             <SelectInput source="ebdi" label="EBDI" choices={ebdis_names2} />
-            {/* <TextInput source="id_ebdi" />
-            <ReferenceInput source="id_ebdi" reference="ebdis">
-	            <SelectInput optionText="nombre" label="EBDI" />
-            </ReferenceInput> */}
+          
         </SimpleForm>
     </Create>
 );
