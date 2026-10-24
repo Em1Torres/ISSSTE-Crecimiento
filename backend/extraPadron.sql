@@ -136,16 +136,16 @@ DROP PROCEDURE IF EXISTS editarInfante;
         END$$
     DELIMITER ;
 
--- The following are necessary additions for the graphs
-
+-- Se apoyo de Claude para agilizar el proceso de crear la tabla de percentiles de IMC, ya que es una tabla grande y tediosa de hacer a mano.
 CREATE TABLE cdc_imc_percentiles (
-    sexo CHAR(1) NOT NULL,                 -- 'H' = niño, 'M' = niña (igual que padron.genero)
-    edad_meses TINYINT UNSIGNED NOT NULL,  -- meses cumplidos, de 24 (2 años) a 72 (6 años)
-    p5  DECIMAL(5,2) NOT NULL,             -- debajo de este IMC: bajo peso
-    p85 DECIMAL(5,2) NOT NULL,             -- desde aquí: sobrepeso
-    p95 DECIMAL(5,2) NOT NULL,             -- desde aquí: obesidad
+    sexo CHAR(1) NOT NULL,                 
+    edad_meses TINYINT UNSIGNED NOT NULL,  
+    p5  DECIMAL(5,2) NOT NULL,             
+    p85 DECIMAL(5,2) NOT NULL,             
+    p95 DECIMAL(5,2) NOT NULL,             
     PRIMARY KEY (sexo, edad_meses)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 INSERT INTO cdc_imc_percentiles (sexo, edad_meses, p5, p85, p95) VALUES
 ('H',24,14.72,18.12,19.28),
