@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, Button } from "@mui/material";
 import {Datagrid,EditButton,ListBase,TextField,} from "react-admin";
 import { Link } from "react-router-dom"; // chat 
 
-export const AdminInicio = () => (
+export const AdminInicio = () => ( // dashbourd de perfil admin, aqui se le dice que puede hacer y ver. Tambien se agrego el button de crear un perfil 
     <Card>
         <CardHeader
             title="Bienvenido, administrador"
@@ -20,7 +20,7 @@ export const AdminInicio = () => (
         />
 
         <CardContent>
-            <ListBase
+            <ListBase // la tabla de todos los perfiles de la plataforma 
                 resource="usuarios"
                 sort={{ field: "id", order: "ASC" }}
             >

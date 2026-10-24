@@ -13,7 +13,9 @@ import {i18nProvider} from "./i18nProvider";
 import { InicioRol } from "./Inicio/Inicio_Rol";
 import { listarUsuarios, editarUsuario } from "./Usuarios";
 
-const MyLogin = () => (
+
+//Pagina de login con link para mandarlo a la pagina de registrarse
+const MyLogin = () => ( 
     <Login>
         <LoginForm />
         <Box textAlign="center" mb={1}>
@@ -24,6 +26,8 @@ const MyLogin = () => (
     </Login>
 );
 
+//Configuración principal del frontend con React Admin.
+//Integra la autenticación, comunicación con la API, idioma y página de inicio según el rol.
 
 export const App = () => (
     <Admin 
@@ -33,26 +37,27 @@ export const App = () => (
     authProvider={authProvider}
     dashboard={InicioRol}
     loginPage={MyLogin}>
-        <Resource
+        <Resource //recursos para los infantes, editar, crear, listar
             name="infantes"
             list={listarInfantes}
             edit={editarInfantes}
             create={crearInfante}
             options={{label: "Infantes"}}
         />
-        <Resource
+        <Resource //recursos para los usuarios, editar, listar
             name="usuarios"
             list={listarUsuarios}
             edit={editarUsuario}
             options={{label: "Usuarios"}}
         />
-        <Resource
+        <Resource //recursos para las mediciones, editar, listar
             name="mediciones"
             list={listarMediciones}
             create={crearMedicion}
             options={{label: "Mediciones"}}
         />
-        <CustomRoutes>
+        <CustomRoutes //rutas personalisadas para el registro y las graficas 
+        >
             <Route path="/registrarse" element={<Registrarse />}/>
             <Route path="/graphs" element={<GraphsPage />} />
         </CustomRoutes>
