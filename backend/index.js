@@ -457,8 +457,7 @@ app.post("/mediciones", soloRoles(["estancia"]), async (req, res)=>{
 	}
 });
 
-// ---------- ESTADO NUTRICIONAL (CDC IMC-para-edad, 24 a 72 meses) ----------
-//Esto definitivamente lo hizo Claude, lo entiendo pero es idea de Claude, no mía.
+//Este endpoint fue creado con la ayuda de la inteligencia artificial Claude
 app.get("/infantes/:id/estado", async (req, res)=>{
 	try{
 		let token=req.get("Authentication");
@@ -474,6 +473,7 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 		return res.sendStatus(401);
 	}
 	
+	//Esta primera seccion es nuestra parte de autenticacion, esta no uso IA
 	try{
 		const id = Number(req.params.id);
 		const alc = alcance(req.usuario);
@@ -492,10 +492,10 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 		if(filas.length == 0){
 			return res.status(404).json({message: "Sin mediciones para este infante"});
 		}
-
+		//Esta busqueda de sql recupera todos los datos necesarios para la grafica
 		const actual = filas[0];
 		const anterior = filas[1];
-
+		//la idea de tomar dos mediciones es de Claude
 		const [refs] = await db.query(
 			"SELECT p5, p85, p95 FROM cdc_imc_percentiles WHERE sexo = ? AND edad_meses = ?",
 			[actual.genero, actual.edad_meses]
@@ -503,18 +503,20 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 		if(refs.length == 0){
 			return res.status(422).json({message: "La referencia CDC cubre de 24 a 72 meses de edad"});
 		}
+		/*Esta busqueda de sql no utiliza IA, se obtienen los percentiles
+		de una tabla en la base de datos*/
 
-		const alturaM = actual.talla / 100;
-		const umbrales = [refs[0].p5, refs[0].p85, refs[0].p95]
-			.map(v => Math.round(Number(v) * alturaM * alturaM * 100) / 100);
-
+		/*Esta ultima parte del endpoint es en la que se utilizo Claude para
+		generarla se envian los datos necesarios como un objeto*/
+		const umbrales = [Number(refs[0].p5), Number(refs[0].p85), Number(refs[0].p95)];
+		
 		res.json({
 			id: id,
-			valor: actual.peso,
+			valor: Number(actual.peso),
 			unidad: "kg",
-			anterior: anterior ? anterior.peso : null,
+			anterior: anterior ? Number(anterior.peso) : null,
 			umbrales: umbrales,
-			imc: actual.imc,
+			imc: Number(actual.imc),
 			edad_meses: actual.edad_meses,
 			nombres: ["Bajo peso", "Peso saludable", "Sobrepeso", "Obesidad"],
 		});

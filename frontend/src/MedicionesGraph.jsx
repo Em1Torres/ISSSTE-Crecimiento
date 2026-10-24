@@ -1,5 +1,4 @@
 import { useGetList } from "react-admin";
-import { useTheme } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line";
 import { Card, CardContent, Box, Typography, Divider } from "@mui/material";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
@@ -20,9 +19,9 @@ const TRAMOS = [
 ];
 
 export const WeightGraph = () => {
-    const theme = useTheme();
-    const textColor = theme.palette.text.primary;
-
+    /*Esta parte del codigo recibio apoyo de la IA Claude para recibir los datos
+    necesarios para la grafica */
+    // se utiliza useGetList para obtener las mediciones de la base de datos
     const { data, isPending, error } = useGetList("mediciones", {
         pagination: { page: 1, perPage: 200 },
         sort: { field: "id", order: "ASC" },
@@ -31,7 +30,9 @@ export const WeightGraph = () => {
     if (isPending) return <p>Cargando...</p>;
     if (error) return <p>Error al cargar las mediciones</p>;
 
-    // Un grupo de puntos por infante: x = talla, y = peso
+    /*Los datos se almacenan en un objeto por infante que funciona como un
+    diccionario. Utiliza el id_infante como llave y almacena adentro el nombre
+    del infante como id y un array de los datos del niño.*/
     const porInfante = {};
     data.forEach((m) => {
         if (!porInfante[m.id_infante]) {
@@ -39,11 +40,17 @@ export const WeightGraph = () => {
         }
         porInfante[m.id_infante].data.push({ x: m.talla, y: m.peso });
     });
+    /*Se obtienen los valores dentro del objeto, removiendo la llave que era el
+    id_infante y se ordenan los datos que llegan desordenados para que en la grafica
+    salgan de menor a mayor. Esta es una recomendacion de Claude 
+    para que la grafica se vea mejor y no se vea desordenada.*/
     const series = Object.values(porInfante).map((s) => ({
         ...s,
         data: s.data.sort((a, b) => a.x - b.x),
     }));
-
+    /*hasta aqui llega la ayuda de Claude, el resto del codigo se saca directamente
+    de la pagina de la libreria Nivo, y se le realizaron ligeras modificaciones
+    para cumplir lo que se nos solicitaba*/
     return (
         <ResponsiveLine
             data={series}
@@ -52,7 +59,7 @@ export const WeightGraph = () => {
             yScale={{ type: "linear", min: "auto", max: "auto" }}
             axisBottom={{ legend: "Talla (cm)", legendOffset: 40, legendPosition: "middle" }}
             axisLeft={{ legend: "Peso (kg)", legendOffset: -45, legendPosition: "middle" }}
-            pointSize={8}
+            pointSize={12}
             useMesh={true}
             legends={[
                 {
@@ -63,23 +70,14 @@ export const WeightGraph = () => {
                     itemHeight: 16,
                 },
             ]}
-            theme={{
-                text: { fill: textColor },
-                axis: {
-                    ticks: { text: { fill: textColor } },
-                    legend: { text: { fill: textColor } },
-                },
-                legends: { text: { fill: textColor } },
-                tooltip: { container: { color: "#000" } },
-            }}
         />
     );
 };
 
 export const HeightGraph = () => {
-    const theme = useTheme();
-    const textColor = theme.palette.text.primary;
-
+    /*Esta parte del codigo recibio apoyo de la IA Claude para recibir los datos
+    necesarios para la grafica */
+    // se utiliza useGetList para obtener las mediciones de la base de datos
     const { data, isPending, error } = useGetList("mediciones", {
         pagination: { page: 1, perPage: 200 },
         sort: { field: "id", order: "ASC" },
@@ -87,8 +85,9 @@ export const HeightGraph = () => {
 
     if (isPending) return <p>Cargando...</p>;
     if (error) return <p>Error al cargar las mediciones</p>;
-
-    // Un grupo de puntos por infante: x = talla, y = peso
+    /*Los datos se almacenan en un objeto por infante que funciona como un
+    diccionario. Utiliza el id_infante como llave y almacena adentro el nombre
+    del infante como id y un array de los datos del niño.*/
     const porInfante = {};
     data.forEach((m) => {
         if (!porInfante[m.id_infante]) {
@@ -96,11 +95,17 @@ export const HeightGraph = () => {
         }
         porInfante[m.id_infante].data.push({ x: m.edad_meses, y: m.talla });
     });
+    /*Se obtienen los valores dentro del objeto, removiendo la llave que era el
+    id_infante y se ordenan los datos que llegan desordenados para que en la grafica
+    salgan de menor a mayor. Esta es una recomendacion de Claude 
+    para que la grafica se vea mejor y no se vea desordenada.*/
     const series = Object.values(porInfante).map((s) => ({
         ...s,
         data: s.data.sort((a, b) => a.x - b.x),
     }));
-
+    /*hasta aqui llega la ayuda de Claude, el resto del codigo se saca directamente
+    de la pagina de la libreria Nivo, y se le realizaron ligeras modificaciones
+    para cumplir lo que se nos solicitaba*/
     return (
         <ResponsiveLine
             data={series}
@@ -109,7 +114,7 @@ export const HeightGraph = () => {
             yScale={{ type: "linear", min: "auto", max: "auto" }}
             axisBottom={{ legend: "Edad (meses)", legendOffset: 40, legendPosition: "middle" }}
             axisLeft={{ legend: "Talla (cm)", legendOffset: -45, legendPosition: "middle" }}
-            pointSize={8}
+            pointSize={12}
             useMesh={true}
             legends={[
                 {
@@ -120,19 +125,13 @@ export const HeightGraph = () => {
                     itemHeight: 16,
                 },
             ]}
-            theme={{
-                text: { fill: textColor },
-                axis: {
-                    ticks: { text: { fill: textColor } },
-                    legend: { text: { fill: textColor } },
-                },
-                legends: { text: { fill: textColor } },
-                tooltip: { container: { color: "#000" } },
-            }}
         />
     );
 };
 
+/*Para esta grafica en especifico se utilizo mucho la ayuda de Claude ya que no
+se encontro en la libreria de Nivo una grafica que cumpliera con la idea
+que teniamos en mente de manera satisfactoria*/
 export const IMCGraph = ({
     titulo = "Peso",
     valor,
@@ -142,33 +141,45 @@ export const IMCGraph = ({
     imc,
     nombres,
 }) => {
+    //Recibe el objeto que envia el backend
     const [b1, b2, b3] = umbrales;
 
-    // Rango visible de la barra: un poco antes de b1 y bastante después de b3
-    const min = Math.min(b1 - (b2 - b1) * 0.5, valor);
-    const max = Math.max(b3 + (b3 - b2) * 1.5, valor);
+    /* Rango visible de la barra: un poco antes de b1 y bastante después de b3
+    Se utiliza el min y max para que los imc que sobrepasen los limites
+    de la barra no se salgan de ella y se vean mal*/
+    const min = Math.min(b1 - (b2 - b1) * 0.5, imc);
+    const max = Math.max(b3 + (b3 - b2) * 1.5, imc);
+    /*Esta funcion se usa para identificar donde se encuentra el valor
+    dentro de la barra, se utiliza mas tarde para colocar
+    cosas dentro de la barra*/
     const pct = (v) => ((v - min) / (max - min)) * 100;
 
-    // Tramo donde cae el valor
+    // Tramo donde cae el valor, con esto se decide el color y la etiqueta
     let indice = 0;
-    if (valor >= b3) indice = 3;
-    else if (valor >= b2) indice = 2;
-    else if (valor >= b1) indice = 1;
+    if (imc >= b3) indice = 3;
+    else if (imc >= b2) indice = 2;
+    else if (imc >= b1) indice = 1;
 
     const tramo = TRAMOS[indice];
-    const etiqueta = (nombres ?? TRAMOS.map((t) => t.nombre))[indice];
+    const etiqueta = nombres[indice];
+    /*el objeto en nombres contiene los nombres de los tramos, aqui se selecciona
+    cual es el que aplica para este IMC*/
 
     // Los 4 segmentos con su ancho
     const limites = [min, b1, b2, b3, max];
     const segmentos = TRAMOS.map((t, i) => ({
         color: t.color,
         ancho: pct(limites[i + 1]) - pct(limites[i]),
+        //aqui se usa la funcion pct para calcular el ancho de cada segmento de la barra
     }));
 
-    // Flecha de tendencia
+    // Flecha de tendencia, si hay un valor anterior, se compara con el actual
     let Flecha = EastIcon;
-    if (anterior != null && valor > anterior) Flecha = NorthEastIcon;
-    if (anterior != null && valor < anterior) Flecha = SouthEastIcon;
+    if (anterior != null && imc > anterior) Flecha = NorthEastIcon;
+    if (anterior != null && imc < anterior) Flecha = SouthEastIcon;
+
+    /*A continuacion se regresa el componente que contiene la grafica, se utilizó
+    Claude para que generar el codigo de la grafica*/
 
     return (
         <Card sx={{ width: 480, maxWidth: "100%", borderRadius: 3 }}>
@@ -207,7 +218,7 @@ export const IMCGraph = ({
                         variant="body2"
                         sx={{
                             position: "absolute",
-                            left: `${pct(valor)}%`,
+                            left: `${pct(imc)}%`,
                             transform: "translateX(-50%)",
                             color: tramo.color,
                             fontWeight: 500,
@@ -229,7 +240,7 @@ export const IMCGraph = ({
                         sx={{
                             position: "absolute",
                             top: "50%",
-                            left: `${pct(valor)}%`,
+                            left: `${pct(imc)}%`,
                             width: 18,
                             height: 18,
                             transform: "translate(-50%, -50%)",

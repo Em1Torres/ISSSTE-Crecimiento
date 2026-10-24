@@ -49,7 +49,7 @@ WHERE u.usuario = 'padre1';
 -- corre hasta aqui 
 
 -- No se puede correr hasta que generamos los usuarios desde el backend con argon2, tercer bloque que corres 
-SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'admin1');
+SET @estancia = (SELECT id_usuario FROM usuarios WHERE usuario = 'admin001');
 
 INSERT INTO mediciones (id_infante, fecha, peso, talla, talla_blanco_familiar, perimetro_cefalico, id_usuario) VALUES
 ((SELECT id_infante FROM padron WHERE matricula = 100001), CURDATE() - INTERVAL 100 DAY, 14.2, 95.5, 172, 49.5, @estancia),
