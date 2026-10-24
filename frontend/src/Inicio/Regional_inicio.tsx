@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@mui/material";
 
-export const RegionalInicio = () => (
+export const RegionalInicio = () => ( //pagina de inicio de perfil regional 
     <Card>
         <CardHeader title="Bienvenido, coordinador Regional" />
         <CardContent>

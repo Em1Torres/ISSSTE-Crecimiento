@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader } from "@mui/material";
 
-export const PadreInicio = () => (
+export const PadreInicio = () => ( //pagina de inicio del padre 
     <Card>
         <CardHeader title="Bienvenido, usuario Padre" />
         <CardContent>
