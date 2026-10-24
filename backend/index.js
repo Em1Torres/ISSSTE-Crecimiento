@@ -509,7 +509,7 @@ app.get("/infantes/:id/estado", async (req, res)=>{
 			id: id,
 			valor: actual.peso,
 			unidad: "kg",
-			anterior: anterior ? anterior.peso : null,  // Manda la información al frontend
+			anterior: anterior ? anterior.peso : null,  // Manda la información al frontend	
 			umbrales: umbrales,
 			imc: actual.imc,
 			edad_meses: actual.edad_meses,
